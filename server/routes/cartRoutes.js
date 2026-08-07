@@ -9,12 +9,14 @@ const {
   deleteCartItem,
 } = require("../controllers/cartController");
 
-router.get("/", getCart);
+const verifyToken = require("../middleware/authMiddleware");
 
-router.post("/", addToCart);
+router.get("/", verifyToken, getCart);
 
-router.put("/:id", updateCart);
+router.post("/", verifyToken, addToCart);
 
-router.delete("/:id", deleteCartItem);
+router.put("/:id", verifyToken, updateCart);
+
+router.delete("/:id", verifyToken, deleteCartItem);
 
 module.exports = router;

@@ -13,7 +13,10 @@ const getCart = async (req, res) => {
       FROM cart
       JOIN products
       ON cart.product_id = products.id
-    `);
+      WHERE cart.user_id = $1
+    `,
+  [req.user.id]
+);
 
     res.json(result.rows);
   } catch (error) {
@@ -49,8 +52,11 @@ const addToCart = async (req, res) => {
 
     // Check if product already exists in cart
     const existing = await pool.query(
-      "SELECT * FROM cart WHERE product_id = $1",
-      [product_id]
+      `SELECT *
+      FROM cart
+      WHERE product_id = $1
+      AND user_id = $2`,
+      [product_id, req.user.id]
     );
 
     if (existing.rows.length > 0) {
@@ -58,18 +64,21 @@ const addToCart = async (req, res) => {
         `UPDATE cart
          SET quantity = quantity + 1
          WHERE product_id = $1
+         AND user_id = $2
          RETURNING *`,
-        [product_id]
+        [product_id,
+          req.user.id,
+        ]
       );
 
       return res.json(result.rows[0]);
     }
 
     const result = await pool.query(
-      `INSERT INTO cart (product_id, quantity)
-       VALUES ($1, 1)
+      `INSERT INTO cart (product_id, quantity, user_id)
+       VALUES ($1, 1, $2)
        RETURNING *`,
-      [product_id]
+      [product_id, req.user.id,]
     );
 
     res.status(201).json(result.rows[0]);
@@ -99,8 +108,9 @@ const updateCart = async (req, res) => {
       `UPDATE cart
        SET quantity = $1
        WHERE id = $2
+       AND user_id = $3
        RETURNING *`,
-      [quantity, id]
+      [quantity, id, req.user.id,]
     );
 
     if (result.rows.length === 0) {
@@ -128,8 +138,9 @@ const deleteCartItem = async (req, res) => {
     const result = await pool.query(
       `DELETE FROM cart
        WHERE id = $1
+       AND user_id = $2
        RETURNING *`,
-      [id]
+      [id, req.user.id,]
     );
 
     if (result.rows.length === 0) {
