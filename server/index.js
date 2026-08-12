@@ -11,6 +11,8 @@ const orderRoutes = require("./routes/orderRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const adminCustomerRoutes = require("./routes/adminCustomerRoutes");
 const path = require("path");
 
 
@@ -24,6 +26,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/admin/customers", adminCustomerRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.get("/", (req, res) => {

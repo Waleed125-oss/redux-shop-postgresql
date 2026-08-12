@@ -69,7 +69,47 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Get ALL CUSTOMERS - ADMIN
+
+const getCustomers = async (req, res) => {
+  try {
+
+    // Make sure only admin can access this
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "Access denied",
+      });
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        role
+      FROM users
+      WHERE role = 'customer'
+      ORDER BY id DESC
+      `
+    );
+
+    res.json(result.rows);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Failed to fetch customers",
+    });
+
+  }
+};
+
+
 module.exports = {
-    getProfile,
-    updateProfile,
+  getProfile,
+  updateProfile,
+  getCustomers,
 };
