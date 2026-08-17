@@ -14,6 +14,7 @@ const upload = require("../middleware/upload");
 
 const {
   getProducts,
+  getHomeProductSections,
   getSingleProduct,
   createProduct,
   updateProduct,
@@ -27,6 +28,13 @@ const {
 
 // User + Admin
 router.get("/", getProducts);
+
+
+// HOME PRODUCT SECTIONS
+router.get(
+  "/home/sections",
+  getHomeProductSections
+);
 
 
 // ================= GET SINGLE PRODUCT =================

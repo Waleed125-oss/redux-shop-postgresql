@@ -3,32 +3,197 @@ const pool = require("../config/db");
 
 // ================= GET PRODUCTS =================
 
+// const getProducts = async (req, res) => {
+//   try {
+//     const page = Number(req.query.page) || 1;
+//     const limit = Number(req.query.limit) || 12;
+//     const offset = (page - 1)* limit;
+
+//     const search = req.query.search || "";
+//     const category_id = req.query.category || "";
+//     const sort = req.query.sort || "";
+
+//     const min_price = req.query.min_price || "";
+//     const max_price = req.query.max_price || "";
+//     const rating = req.query.rating || "";
+
+//     // Admin can see active + inactive products
+//     // Normal users only see active products
+//     const admin = req.query.admin === "true";
+
+//     const offset = (page - 1) * limit;
+
+//     let orderBy = "ORDER BY p.id";
+
+//     if (sort === "price_asc") {
+//       orderBy = "ORDER BY p.price ASC";
+//     } else if (sort === "price_desc") {
+//       orderBy = "ORDER BY p.price DESC";
+//     } else if (sort === "title_asc") {
+//       orderBy = "ORDER BY p.title ASC";
+//     } else if (sort === "title_desc") {
+//       orderBy = "ORDER BY p.title DESC";
+//     }
+
+//     const products = await pool.query(
+//       `
+//       SELECT
+//         p.*,
+//         c.name AS category
+
+//       FROM products p
+
+//       LEFT JOIN categories c
+//       ON p.category_id = c.id
+
+//       WHERE
+//         p.title ILIKE $1
+
+//       AND
+//         ($2::int IS NULL OR p.category_id = $2)
+
+//       AND
+//         ($3 = TRUE OR p.is_active = TRUE)
+
+//       ${orderBy}
+
+//       LIMIT $4 OFFSET $5
+//       `,
+//       [
+//         `%${search}%`,
+//         category_id === "" ? null : Number(category_id),
+//         admin,
+//         limit,
+//         offset,
+//       ]
+//     );
+
+//     const total = await pool.query(
+//       `
+//       SELECT COUNT(*)
+
+//       FROM products p
+
+//       WHERE
+//         p.title ILIKE $1
+
+//       AND
+//         ($2::int IS NULL OR p.category_id = $2)
+
+//       AND
+//         ($3 = TRUE OR p.is_active = TRUE)
+//       `,
+//       [
+//         `%${search}%`,
+//         category_id === "" ? null : Number(category_id),
+//         admin,
+//       ]
+//     );
+
+//     res.json({
+//       products: products.rows,
+//       currentPage: page,
+//       totalProducts: Number(total.rows[0].count),
+//       totalPages: Math.ceil(
+//         Number(total.rows[0].count) / limit
+//       ),
+//     });
+//   } catch (error) {
+//     console.error(error);
+
+//     res.status(500).json({
+//       message: "Server Error",
+//     });
+//   }
+// };
+
+
+
 const getProducts = async (req, res) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
 
-    const search = req.query.search || "";
-    const category_id = req.query.category || "";
-    const sort = req.query.sort || "";
+    // ================= PAGINATION =================
 
-    // Admin can see active + inactive products
-    // Normal users only see active products
-    const admin = req.query.admin === "true";
+    const page =
+      Number(req.query.page) || 1;
 
-    const offset = (page - 1) * limit;
+    const limit =
+      Number(req.query.limit) || 12;
 
-    let orderBy = "ORDER BY p.id";
+    const offset =
+      (page - 1) * limit;
+
+
+    // ================= FILTERS =================
+
+    const search =
+      req.query.search || "";
+
+    const category_id =
+      req.query.category || "";
+
+    const sort =
+      req.query.sort || "";
+
+    const min_price =
+      req.query.min_price || "";
+
+    const max_price =
+      req.query.max_price || "";
+
+    const rating =
+      req.query.rating || "";
+
+
+    // ================= ADMIN =================
+
+    // Admin can see active + inactive products.
+    // Normal users can only see active products.
+
+    const admin =
+      req.query.admin === "true";
+
+
+    // ================= SORTING =================
+
+    let orderBy =
+      "ORDER BY p.id DESC";
+
 
     if (sort === "price_asc") {
-      orderBy = "ORDER BY p.price ASC";
+
+      orderBy =
+        "ORDER BY p.price ASC";
+
     } else if (sort === "price_desc") {
-      orderBy = "ORDER BY p.price DESC";
+
+      orderBy =
+        "ORDER BY p.price DESC";
+
     } else if (sort === "title_asc") {
-      orderBy = "ORDER BY p.title ASC";
+
+      orderBy =
+        "ORDER BY p.title ASC";
+
     } else if (sort === "title_desc") {
-      orderBy = "ORDER BY p.title DESC";
+
+      orderBy =
+        "ORDER BY p.title DESC";
+
+    } else if (sort === "rating_desc") {
+
+      orderBy =
+        "ORDER BY p.rating DESC, p.id DESC";
+
+    } else if (sort === "newest") {
+
+      orderBy =
+        "ORDER BY p.created_at DESC, p.id DESC";
+
     }
+
+
+    // ================= PRODUCTS =================
 
     const products = await pool.query(
       `
@@ -39,70 +204,345 @@ const getProducts = async (req, res) => {
       FROM products p
 
       LEFT JOIN categories c
-      ON p.category_id = c.id
+        ON p.category_id = c.id
 
       WHERE
+
+        -- SEARCH
         p.title ILIKE $1
 
       AND
-        ($2::int IS NULL OR p.category_id = $2)
+
+        -- CATEGORY
+        (
+          $2::int IS NULL
+          OR p.category_id = $2
+        )
 
       AND
-        ($3 = TRUE OR p.is_active = TRUE)
+
+        -- MIN PRICE
+        (
+          $3::numeric IS NULL
+          OR p.price >= $3
+        )
+
+      AND
+
+        -- MAX PRICE
+        (
+          $4::numeric IS NULL
+          OR p.price <= $4
+        )
+
+      AND
+
+        -- RATING
+        (
+          $5::numeric IS NULL
+          OR p.rating >= $5
+        )
+
+      AND
+
+        -- ACTIVE STATUS
+        (
+          $6 = TRUE
+          OR p.is_active = TRUE
+        )
 
       ${orderBy}
 
-      LIMIT $4 OFFSET $5
+      LIMIT $7
+      OFFSET $8
       `,
       [
+
+        // $1 search
         `%${search}%`,
-        category_id === "" ? null : Number(category_id),
+
+        // $2 category
+        category_id === ""
+          ? null
+          : Number(category_id),
+
+        // $3 minimum price
+        min_price === ""
+          ? null
+          : Number(min_price),
+
+        // $4 maximum price
+        max_price === ""
+          ? null
+          : Number(max_price),
+
+        // $5 rating
+        rating === ""
+          ? null
+          : Number(rating),
+
+        // $6 admin
         admin,
+
+        // $7 limit
         limit,
+
+        // $8 offset
         offset,
+
       ]
     );
 
+
+    // ================= TOTAL COUNT =================
+
+    // IMPORTANT:
+    //
+    // This query uses the SAME filters
+    // as the products query.
+    //
+    // Otherwise pagination would be incorrect.
+
     const total = await pool.query(
       `
-      SELECT COUNT(*)
+      SELECT
+        COUNT(*)
 
       FROM products p
 
       WHERE
+
+        -- SEARCH
         p.title ILIKE $1
 
       AND
-        ($2::int IS NULL OR p.category_id = $2)
+
+        -- CATEGORY
+        (
+          $2::int IS NULL
+          OR p.category_id = $2
+        )
 
       AND
-        ($3 = TRUE OR p.is_active = TRUE)
+
+        -- MIN PRICE
+        (
+          $3::numeric IS NULL
+          OR p.price >= $3
+        )
+
+      AND
+
+        -- MAX PRICE
+        (
+          $4::numeric IS NULL
+          OR p.price <= $4
+        )
+
+      AND
+
+        -- RATING
+        (
+          $5::numeric IS NULL
+          OR p.rating >= $5
+        )
+
+      AND
+
+        -- ACTIVE STATUS
+        (
+          $6 = TRUE
+          OR p.is_active = TRUE
+        )
       `,
       [
+
+        // $1 search
         `%${search}%`,
-        category_id === "" ? null : Number(category_id),
+
+        // $2 category
+        category_id === ""
+          ? null
+          : Number(category_id),
+
+        // $3 minimum price
+        min_price === ""
+          ? null
+          : Number(min_price),
+
+        // $4 maximum price
+        max_price === ""
+          ? null
+          : Number(max_price),
+
+        // $5 rating
+        rating === ""
+          ? null
+          : Number(rating),
+
+        // $6 admin
         admin,
+
       ]
     );
 
+
+    // ================= TOTAL PRODUCTS =================
+
+    const totalProducts =
+      Number(
+        total.rows[0].count
+      );
+
+
+    // ================= RESPONSE =================
+
     res.json({
-      products: products.rows,
-      currentPage: page,
-      totalProducts: Number(total.rows[0].count),
-      totalPages: Math.ceil(
-        Number(total.rows[0].count) / limit
-      ),
+
+      products:
+        products.rows,
+
+      currentPage:
+        page,
+
+      totalProducts,
+
+      totalPages:
+        Math.ceil(
+          totalProducts / limit
+        ),
+
     });
+
+
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      "Get products error:",
+      error
+    );
+
+    res.status(500).json({
+
+      message:
+        "Server Error",
+
+    });
+
+  }
+};
+
+// Home Product Sections
+
+// ================= HOME PRODUCT SECTIONS =================
+
+const getHomeProductSections = async (req, res) => {
+  try {
+
+    // ================= BEST SELLERS =================
+    // Based on actual orders
+
+    const bestSellerResult = await pool.query(`
+      SELECT
+        p.*,
+        c.name AS category,
+        COALESCE(SUM(oi.quantity), 0) AS total_sold
+
+      FROM products p
+
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+
+      INNER JOIN order_items oi
+        ON p.id = oi.product_id
+
+      WHERE p.is_active = TRUE
+
+      GROUP BY p.id, c.name
+
+      ORDER BY total_sold DESC, p.id DESC
+
+      LIMIT 8
+    `);
+
+
+    // ================= TOP RATED =================
+    // Based on actual product rating
+
+    const topRatedResult = await pool.query(`
+      SELECT
+        p.*,
+        c.name AS category
+
+      FROM products p
+
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+
+      WHERE
+        p.is_active = TRUE
+
+      ORDER BY
+        p.rating DESC,
+        p.id DESC
+
+      LIMIT 8
+    `);
+
+
+    // ================= NEW ARRIVALS =================
+    // Based on actual created_at
+
+    const newArrivalResult = await pool.query(`
+      SELECT
+        p.*,
+        c.name AS category
+
+      FROM products p
+
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+
+      WHERE
+        p.is_active = TRUE
+
+      ORDER BY
+        p.created_at DESC,
+        p.id DESC
+
+      LIMIT 8
+    `);
+
+
+    // ================= RESPONSE =================
+
+    res.json({
+
+      bestSellers:
+        bestSellerResult.rows,
+
+      topRated:
+        topRatedResult.rows,
+
+      newArrivals:
+        newArrivalResult.rows,
+
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      "Home product sections error:",
+      error
+    );
 
     res.status(500).json({
       message: "Server Error",
     });
+
   }
 };
-
-
 
 // ================= GET SINGLE PRODUCT =================
 
@@ -800,6 +1240,7 @@ const permanentlyDeleteProduct = async (req, res) => {
 
 module.exports = {
   getProducts,
+  getHomeProductSections,
   getSingleProduct,
   createProduct,
   updateProduct,
