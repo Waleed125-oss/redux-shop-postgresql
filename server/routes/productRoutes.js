@@ -8,6 +8,7 @@ const express = require("express");
 
 const router = express.Router();
 
+const sellerMiddleware = require("../middleware/sellerMiddleware")
 const verifyToken = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 const upload = require("../middleware/upload");
@@ -17,10 +18,15 @@ const {
   getHomeProductSections,
   getSingleProduct,
   createProduct,
+  createSellerProduct,
+  getSellerProducts,
   updateProduct,
   deleteProduct,
   toggleProductStatus,
   permanentlyDeleteProduct,
+  getPendingSellerProducts,
+  approveSellerProduct,
+  rejectSellerProduct,
 } = require("../controllers/productController");
 
 
@@ -36,6 +42,40 @@ router.get(
   getHomeProductSections
 );
 
+// ================= GET SELLER PRODUCTS =================
+
+router.get(
+  "/seller",
+
+  verifyToken,
+
+  sellerMiddleware,
+
+  getSellerProducts
+);
+
+
+router.get(
+  "/admin/pending",
+  verifyToken,
+  adminMiddleware,
+  getPendingSellerProducts
+);
+
+
+router.patch(
+  "/admin/:id/approve",
+  verifyToken,
+  adminMiddleware,
+  approveSellerProduct
+);
+
+router.patch(
+  "/admin/:id/reject",
+  verifyToken,
+  adminMiddleware,
+  rejectSellerProduct
+);
 
 // ================= GET SINGLE PRODUCT =================
 
@@ -63,6 +103,32 @@ router.post(
 
   createProduct
 );
+
+
+// ================= CREATE SELLER PRODUCT =================
+
+router.post(
+  "/seller",
+
+  verifyToken,
+
+  sellerMiddleware,
+
+  upload.fields([
+    {
+      name: "image",
+      maxCount: 1,
+    },
+    {
+      name: "images",
+      maxCount: 10,
+    },
+  ]),
+
+  createSellerProduct
+);
+
+
 
 // ================= UPDATE PRODUCT =================
 
@@ -112,6 +178,10 @@ router.delete(
   adminMiddleware,
   permanentlyDeleteProduct
 );
+
+
+
+
 
 
 

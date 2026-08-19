@@ -14,6 +14,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const adminCustomerRoutes = require("./routes/adminCustomerRoutes");
+const sellerRoutes = require("./routes/sellerRoutes")
 const path = require("path");
 
 
@@ -23,6 +24,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/seller", sellerRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/product-images", productImageRoutes);
 app.use("/api/cart", cartRoutes);

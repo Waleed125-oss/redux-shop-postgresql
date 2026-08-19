@@ -1,112 +1,6 @@
 
 const pool = require("../config/db");
 
-// ================= GET PRODUCTS =================
-
-// const getProducts = async (req, res) => {
-//   try {
-//     const page = Number(req.query.page) || 1;
-//     const limit = Number(req.query.limit) || 12;
-//     const offset = (page - 1)* limit;
-
-//     const search = req.query.search || "";
-//     const category_id = req.query.category || "";
-//     const sort = req.query.sort || "";
-
-//     const min_price = req.query.min_price || "";
-//     const max_price = req.query.max_price || "";
-//     const rating = req.query.rating || "";
-
-//     // Admin can see active + inactive products
-//     // Normal users only see active products
-//     const admin = req.query.admin === "true";
-
-//     const offset = (page - 1) * limit;
-
-//     let orderBy = "ORDER BY p.id";
-
-//     if (sort === "price_asc") {
-//       orderBy = "ORDER BY p.price ASC";
-//     } else if (sort === "price_desc") {
-//       orderBy = "ORDER BY p.price DESC";
-//     } else if (sort === "title_asc") {
-//       orderBy = "ORDER BY p.title ASC";
-//     } else if (sort === "title_desc") {
-//       orderBy = "ORDER BY p.title DESC";
-//     }
-
-//     const products = await pool.query(
-//       `
-//       SELECT
-//         p.*,
-//         c.name AS category
-
-//       FROM products p
-
-//       LEFT JOIN categories c
-//       ON p.category_id = c.id
-
-//       WHERE
-//         p.title ILIKE $1
-
-//       AND
-//         ($2::int IS NULL OR p.category_id = $2)
-
-//       AND
-//         ($3 = TRUE OR p.is_active = TRUE)
-
-//       ${orderBy}
-
-//       LIMIT $4 OFFSET $5
-//       `,
-//       [
-//         `%${search}%`,
-//         category_id === "" ? null : Number(category_id),
-//         admin,
-//         limit,
-//         offset,
-//       ]
-//     );
-
-//     const total = await pool.query(
-//       `
-//       SELECT COUNT(*)
-
-//       FROM products p
-
-//       WHERE
-//         p.title ILIKE $1
-
-//       AND
-//         ($2::int IS NULL OR p.category_id = $2)
-
-//       AND
-//         ($3 = TRUE OR p.is_active = TRUE)
-//       `,
-//       [
-//         `%${search}%`,
-//         category_id === "" ? null : Number(category_id),
-//         admin,
-//       ]
-//     );
-
-//     res.json({
-//       products: products.rows,
-//       currentPage: page,
-//       totalProducts: Number(total.rows[0].count),
-//       totalPages: Math.ceil(
-//         Number(total.rows[0].count) / limit
-//       ),
-//     });
-//   } catch (error) {
-//     console.error(error);
-
-//     res.status(500).json({
-//       message: "Server Error",
-//     });
-//   }
-// };
-
 
 
 const getProducts = async (req, res) => {
@@ -244,13 +138,13 @@ const getProducts = async (req, res) => {
         )
 
       AND
-
-        -- ACTIVE STATUS
-        (
-          $6 = TRUE
-          OR p.is_active = TRUE
-        )
-
+(
+  $6 = TRUE
+  OR (
+    p.is_active = TRUE
+    AND p.approval_status = 'approved'
+  )
+)
       ${orderBy}
 
       LIMIT $7
@@ -348,12 +242,13 @@ const getProducts = async (req, res) => {
         )
 
       AND
-
-        -- ACTIVE STATUS
-        (
-          $6 = TRUE
-          OR p.is_active = TRUE
-        )
+(
+  $6 = TRUE
+  OR (
+    p.is_active = TRUE
+    AND p.approval_status = 'approved'
+  )
+)
       `,
       [
 
@@ -777,6 +672,541 @@ const createProduct = async (req, res) => {
   }
 };
 
+// ================= CREATE SELLER PRODUCT =================
+
+const createSellerProduct = async (req, res) => {
+  try {
+    // ================= SELLER =================
+
+    // sellerMiddleware already verified that
+    // this user is a seller.
+    const sellerId = req.user.id;
+
+    // ================= PRODUCT DATA =================
+
+    const {
+      title,
+      price,
+      description,
+      category_id,
+      rating,
+    } = req.body;
+
+    // ================= MAIN IMAGE =================
+
+    const mainImageFile = req.files?.image?.[0];
+
+    const mainImage = mainImageFile
+      ? `/uploads/${mainImageFile.filename}`
+      : null;
+
+    // ================= GALLERY IMAGES =================
+
+    const galleryImages = req.files?.images || [];
+
+    // ================= VALIDATION =================
+
+    if (!title || title.trim() === "") {
+      return res.status(400).json({
+        message: "Title is required",
+      });
+    }
+
+    if (!price || Number(price) <= 0) {
+      return res.status(400).json({
+        message: "Price must be greater than 0",
+      });
+    }
+
+    if (!description || description.trim() === "") {
+      return res.status(400).json({
+        message: "Description is required",
+      });
+    }
+
+    if (!category_id) {
+      return res.status(400).json({
+        message: "Category is required",
+      });
+    }
+
+    if (!mainImage) {
+      return res.status(400).json({
+        message: "Main image is required",
+      });
+    }
+
+    if (
+      rating === undefined ||
+      rating === null ||
+      Number(rating) < 0 ||
+      Number(rating) > 5
+    ) {
+      return res.status(400).json({
+        message: "Rating must be between 0 and 5",
+      });
+    }
+
+    // ================= INSERT PRODUCT =================
+
+    const result = await pool.query(
+      `
+      INSERT INTO products
+      (
+        title,
+        price,
+        description,
+        category_id,
+        image,
+        rating,
+        is_active,
+        seller_id,
+        approval_status
+      )
+
+      VALUES
+      (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        TRUE,
+        $7,
+        'pending'
+      )
+
+      RETURNING *
+      `,
+      [
+        title.trim(),
+        Number(price),
+        description.trim(),
+        Number(category_id),
+        mainImage,
+        Number(rating),
+        sellerId,
+      ]
+    );
+
+    const product = result.rows[0];
+
+    // ================= INSERT GALLERY IMAGES =================
+
+    for (const file of galleryImages) {
+      await pool.query(
+        `
+        INSERT INTO product_image
+        (
+          product_id,
+          image
+        )
+
+        VALUES
+        ($1, $2)
+        `,
+        [
+          product.id,
+          `/uploads/${file.filename}`,
+        ]
+      );
+    }
+
+    // ================= GET GALLERY IMAGES =================
+
+    const imageResult = await pool.query(
+      `
+      SELECT
+        id,
+        image
+
+      FROM product_image
+
+      WHERE product_id = $1
+
+      ORDER BY id ASC
+      `,
+      [product.id]
+    );
+
+    // ================= RESPONSE =================
+
+    res.status(201).json({
+      message:
+        "Product created successfully and is waiting for admin approval.",
+
+      product: {
+        ...product,
+        images: imageResult.rows,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "Create seller product error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+// ================= GET SELLER PRODUCTS =================
+
+const getSellerProducts = async (req, res) => {
+  try {
+    // ================= SELLER =================
+
+    const sellerId = req.user.id;
+
+    // ================= PAGINATION =================
+
+    const page = Number(req.query.page) || 1;
+
+    const limit = Number(req.query.limit) || 12;
+
+    const offset = (page - 1) * limit;
+
+    // ================= FILTERS =================
+
+    const search = req.query.search || "";
+
+    const category_id = req.query.category || "";
+
+    const sort = req.query.sort || "";
+
+    const approval_status =
+      req.query.approval_status || "";
+
+    // ================= SORTING =================
+
+    let orderBy = "ORDER BY p.id DESC";
+
+    if (sort === "price_asc") {
+      orderBy = "ORDER BY p.price ASC";
+    }
+
+    else if (sort === "price_desc") {
+      orderBy = "ORDER BY p.price DESC";
+    }
+
+    else if (sort === "title_asc") {
+      orderBy = "ORDER BY p.title ASC";
+    }
+
+    else if (sort === "title_desc") {
+      orderBy = "ORDER BY p.title DESC";
+    }
+
+    else if (sort === "newest") {
+      orderBy =
+        "ORDER BY p.created_at DESC, p.id DESC";
+    }
+
+    // ================= GET PRODUCTS =================
+
+    const products = await pool.query(
+      `
+      SELECT
+        p.*,
+        c.name AS category
+
+      FROM products p
+
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+
+      WHERE
+
+        -- IMPORTANT:
+        -- Only logged-in seller's products
+
+        p.seller_id = $1
+
+      AND
+
+        -- SEARCH
+
+        p.title ILIKE $2
+
+      AND
+
+        -- CATEGORY
+
+        (
+          $3::int IS NULL
+          OR p.category_id = $3
+        )
+
+      AND
+
+        -- APPROVAL STATUS
+
+        (
+          $4 = ''
+          OR p.approval_status = $4
+        )
+
+      ${orderBy}
+
+      LIMIT $5
+      OFFSET $6
+      `,
+      [
+        sellerId,
+
+        `%${search}%`,
+
+        category_id === ""
+          ? null
+          : Number(category_id),
+
+        approval_status,
+
+        limit,
+
+        offset,
+      ]
+    );
+
+    // ================= TOTAL COUNT =================
+
+    const total = await pool.query(
+      `
+      SELECT
+        COUNT(*)
+
+      FROM products p
+
+      WHERE
+
+        p.seller_id = $1
+
+      AND
+
+        p.title ILIKE $2
+
+      AND
+
+        (
+          $3::int IS NULL
+          OR p.category_id = $3
+        )
+
+      AND
+
+        (
+          $4 = ''
+          OR p.approval_status = $4
+        )
+      `,
+      [
+        sellerId,
+
+        `%${search}%`,
+
+        category_id === ""
+          ? null
+          : Number(category_id),
+
+        approval_status,
+      ]
+    );
+
+    // ================= TOTAL =================
+
+    const totalProducts =
+      Number(total.rows[0].count);
+
+    // ================= RESPONSE =================
+
+    res.json({
+      products: products.rows,
+
+      currentPage: page,
+
+      totalProducts,
+
+      totalPages:
+        Math.ceil(
+          totalProducts / limit
+        ),
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Get seller products error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+
+
+
+// ========================================
+// GET PENDING SELLER PRODUCTS
+// ========================================
+
+const getPendingSellerProducts = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        p.*,
+        c.name AS category,
+        u.name AS seller_name,
+        u.email AS seller_email
+
+      FROM products p
+
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+
+      LEFT JOIN users u
+        ON p.seller_id = u.id
+
+      WHERE p.approval_status = 'pending'
+
+      ORDER BY p.created_at DESC
+    `);
+
+    res.json({
+      products: result.rows,
+    });
+
+  } catch (error) {
+    console.error(
+      "Get pending seller products error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+
+
+// ========================================
+// APPROVE SELLER PRODUCT
+// ========================================
+
+const approveSellerProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      UPDATE products
+
+      SET
+        approval_status = 'approved',
+        is_active = TRUE
+
+      WHERE id = $1
+      AND approval_status = 'pending'
+
+      RETURNING *
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message:
+          "Pending product not found",
+      });
+    }
+
+    res.json({
+      message:
+        "Product approved successfully",
+
+      product:
+        result.rows[0],
+    });
+
+  } catch (error) {
+    console.error(
+      "Approve seller product error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+
+
+
+// ========================================
+// REJECT SELLER PRODUCT
+// ========================================
+
+const rejectSellerProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      reason,
+    } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE products
+
+      SET
+        approval_status = 'rejected',
+        is_active = FALSE
+
+      WHERE id = $1
+      AND approval_status = 'pending'
+
+      RETURNING *
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message:
+          "Pending product not found",
+      });
+    }
+
+    res.json({
+      message:
+        "Product rejected successfully",
+
+      reason:
+        reason || null,
+
+      product:
+        result.rows[0],
+    });
+
+  } catch (error) {
+    console.error(
+      "Reject seller product error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
 // ================= UPDATE PRODUCT =================
 
 // const updateProduct = async (req, res) => {
@@ -1243,8 +1673,14 @@ module.exports = {
   getHomeProductSections,
   getSingleProduct,
   createProduct,
+  createSellerProduct,
+  getSellerProducts,
   updateProduct,
   toggleProductStatus,
   deleteProduct,
   permanentlyDeleteProduct,
+
+  getPendingSellerProducts,
+  approveSellerProduct,
+  rejectSellerProduct,
 };
