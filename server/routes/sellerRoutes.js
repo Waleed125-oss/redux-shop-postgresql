@@ -1,31 +1,235 @@
+// const express = require("express");
+
+
+// const router = express.Router();
+// const verifyToken = require("../middleware/authMiddleware");
+// const sellerMiddleware = require("../middleware/sellerMiddleware");
+// const upload = require("../middleware/upload");
+// const {
+//   applyAsSeller,
+//   getMySellerApplication,
+//   createSellerProduct,
+//   getMyProducts,
+//   updateSellerProduct,
+//   deleteSellerProduct,
+//   toggleProductStatus,
+//   getSellerDashboardStats,
+//   getSellerProducts,
+//   getSellerOrders,
+//   getSellerProductById,
+//   updateSellerOrderStatus,
+
+//   getSellerProfile,
+//   updateSellerProfile,
+//   getSellerOrderDetails,
+//   updateSellerOrderStatus
+// } = require("../controllers/sellerController");
+
+
+
+
+// // Apply to become seller
+// router.post(
+//   "/apply",
+//   verifyToken,
+//   applyAsSeller
+// );
+
+
+// // Get current user's application
+// router.get(
+//   "/application",
+//   verifyToken,
+//   getMySellerApplication
+// );
+
+// router.get(
+//   "/dashboard/stats",
+//   verifyToken,
+//   sellerMiddleware,
+//   getSellerDashboardStats
+// );
+
+// router.get(
+//   "/orders",
+//   verifyToken,
+//   sellerMiddleware,
+//   getSellerOrders
+// );
+
+// // Get single seller order
+// router.get(
+//   "/orders/:id",
+//   verifyToken,
+//   sellerMiddleware,
+//   getSellerOrderDetails,
+// );
+
+// router.get(
+//   "/products/:id",
+//   verifyToken,
+//   sellerMiddleware,
+//   getSellerProductById,
+// );
+
+// // ========================================
+// // Create Product as Seller
+// // ========================================
+
+//  router.get(
+//   "/products",
+//   verifyToken,
+//   sellerMiddleware,
+//   getSellerProducts
+// );
+
+// router.post(
+//   "/products",
+
+//   verifyToken,
+
+//   sellerMiddleware,
+
+//   upload.fields([
+//     {
+//       name: "image",
+//       maxCount: 1,
+//     },
+//     {
+//       name: "images",
+//       maxCount: 10,
+//     },
+//   ]),
+
+//   createSellerProduct
+// );
+
+// // ========================================
+// // Get My Products
+// // ========================================
+
+// router.get(
+//   "/products",
+//   verifyToken,
+//   sellerMiddleware,
+//   getMyProducts
+// );
+
+// router.put(
+//   "/products/:id",
+//   verifyToken,
+//   sellerMiddleware,
+//   upload.single("image"),
+//   updateSellerProduct
+// );
+
+
+// router.delete(
+//   "/products/:id",
+//   verifyToken,
+//   sellerMiddleware,
+//   deleteSellerProduct
+// );
+// router.patch(
+//   "/products/:id/status",
+//   verifyToken,
+//   sellerMiddleware,
+//   updateSellerProductStatus
+// );
+
+// router.patch(
+//   "/products/:id/status",
+//   verifyToken,
+//   sellerMiddleware,
+//   toggleProductStatus
+// );
+
+// router.patch(
+//   "/orders/:id/status",
+//   verifyToken,
+//   sellerMiddleware,
+//   updateSellerOrderStatus
+// );
+
+// // ========================================
+// // SELLER PROFILE
+// // ========================================
+
+// router.get(
+//   "/profile",
+//   verifyToken,
+//   sellerMiddleware,
+//   getSellerProfile
+// );
+
+// router.put(
+//   "/profile",
+//   verifyToken,
+//   sellerMiddleware,
+//   updateSellerProfile
+// );
+// module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const express = require("express");
 
-
 const router = express.Router();
+
 const verifyToken = require("../middleware/authMiddleware");
 const sellerMiddleware = require("../middleware/sellerMiddleware");
 const upload = require("../middleware/upload");
+
 const {
   applyAsSeller,
   getMySellerApplication,
+
+  // Seller Products
   createSellerProduct,
-  getMyProducts,
-  updateSellerProduct,
-  deleteSellerProduct,
-  toggleProductStatus,
-  getSellerDashboardStats,
   getSellerProducts,
-  getSellerOrders,
+  updateSellerProduct,
+  updateSellerProductStatus,
   getSellerProductById,
+
+  // Seller Dashboard
+  getSellerDashboardStats,
+
+  // Seller Orders
+  getSellerOrders,
+  getSellerOrderDetails,
   updateSellerOrderStatus,
 
+  // Seller Profile
   getSellerProfile,
   updateSellerProfile,
-  getSellerOrderDetails,
+
 } = require("../controllers/sellerController");
 
 
-
+// ========================================
+// SELLER APPLICATION
+// ========================================
 
 // Apply to become seller
 router.post(
@@ -34,13 +238,17 @@ router.post(
   applyAsSeller
 );
 
-
 // Get current user's application
 router.get(
   "/application",
   verifyToken,
   getMySellerApplication
 );
+
+
+// ========================================
+// SELLER DASHBOARD
+// ========================================
 
 router.get(
   "/dashboard/stats",
@@ -49,6 +257,12 @@ router.get(
   getSellerDashboardStats
 );
 
+
+// ========================================
+// SELLER ORDERS
+// ========================================
+
+// Get seller orders
 router.get(
   "/orders",
   verifyToken,
@@ -61,34 +275,43 @@ router.get(
   "/orders/:id",
   verifyToken,
   sellerMiddleware,
-  getSellerOrderDetails,
+  getSellerOrderDetails
 );
 
-router.get(
-  "/products/:id",
+// Update seller order status
+router.patch(
+  "/orders/:id/status",
   verifyToken,
   sellerMiddleware,
-  getSellerProductById,
+  updateSellerOrderStatus
 );
 
+
 // ========================================
-// Create Product as Seller
+// SELLER PRODUCTS
 // ========================================
 
- router.get(
+// Get seller products
+router.get(
   "/products",
   verifyToken,
   sellerMiddleware,
   getSellerProducts
 );
 
+// Get single seller product
+router.get(
+  "/products/:id",
+  verifyToken,
+  sellerMiddleware,
+  getSellerProductById
+);
+
+// Create seller product
 router.post(
   "/products",
-
   verifyToken,
-
   sellerMiddleware,
-
   upload.fields([
     {
       name: "image",
@@ -99,21 +322,10 @@ router.post(
       maxCount: 10,
     },
   ]),
-
   createSellerProduct
 );
 
-// ========================================
-// Get My Products
-// ========================================
-
-router.get(
-  "/products",
-  verifyToken,
-  sellerMiddleware,
-  getMyProducts
-);
-
+// Update seller product
 router.put(
   "/products/:id",
   verifyToken,
@@ -122,33 +334,20 @@ router.put(
   updateSellerProduct
 );
 
-
-router.delete(
-  "/products/:id",
-  verifyToken,
-  sellerMiddleware,
-  deleteSellerProduct
-);
-
-
+// Activate / Deactivate seller product
 router.patch(
   "/products/:id/status",
   verifyToken,
   sellerMiddleware,
-  toggleProductStatus
+  updateSellerProductStatus
 );
 
-router.patch(
-  "/orders/:id/status",
-  verifyToken,
-  sellerMiddleware,
-  updateSellerOrderStatus
-);
 
 // ========================================
 // SELLER PROFILE
 // ========================================
 
+// Get seller profile
 router.get(
   "/profile",
   verifyToken,
@@ -156,10 +355,13 @@ router.get(
   getSellerProfile
 );
 
+// Update seller profile
 router.put(
   "/profile",
   verifyToken,
   sellerMiddleware,
   updateSellerProfile
 );
+
+
 module.exports = router;

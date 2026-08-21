@@ -563,36 +563,104 @@ const updateSellerProduct = async (req, res) => {
 // Delete Seller Product
 // ========================================
 
-const deleteSellerProduct = async (req, res) => {
+// const deleteSellerProduct = async (req, res) => {
+//   try {
+//     const sellerId = req.user.id;
+//     const productId = req.params.id;
+
+//     const result = await pool.query(
+//       `
+//       DELETE FROM products
+//       WHERE id = $1
+//       AND seller_id = $2
+//       RETURNING id, title
+//       `,
+//       [productId, sellerId]
+//     );
+
+//     if (result.rows.length === 0) {
+//       return res.status(404).json({
+//         message:
+//           "Product not found or you do not own this product",
+//       });
+//     }
+
+//     res.json({
+//       message: "Product deleted successfully",
+//       product: result.rows[0],
+//     });
+
+//   } catch (error) {
+//     console.error(
+//       "Delete seller product error:",
+//       error
+//     );
+
+//     res.status(500).json({
+//       message: "Server Error",
+//     });
+//   }
+// };
+
+const updateSellerProductStatus = async (req, res) => {
   try {
     const sellerId = req.user.id;
     const productId = req.params.id;
+    const { is_active } = req.body;
 
-    const result = await pool.query(
+    // ================= VALIDATION =================
+
+    if (typeof is_active !== "boolean") {
+      return res.status(400).json({
+        message: "is_active must be true or false",
+      });
+    }
+
+    // ================= CHECK OWNERSHIP =================
+
+    const productResult = await pool.query(
       `
-      DELETE FROM products
+      SELECT id, title, is_active
+      FROM products
       WHERE id = $1
       AND seller_id = $2
-      RETURNING id, title
       `,
       [productId, sellerId]
     );
 
-    if (result.rows.length === 0) {
+    if (productResult.rows.length === 0) {
       return res.status(404).json({
         message:
           "Product not found or you do not own this product",
       });
     }
 
-    res.json({
-      message: "Product deleted successfully",
+    // ================= UPDATE STATUS =================
+
+    const result = await pool.query(
+      `
+      UPDATE products
+      SET is_active = $1
+      WHERE id = $2
+      AND seller_id = $3
+      RETURNING id, title, is_active
+      `,
+      [
+        is_active,
+        productId,
+        sellerId,
+      ]
+    );
+
+    res.status(200).json({
+      message: is_active
+        ? "Product activated successfully"
+        : "Product deactivated successfully",
       product: result.rows[0],
     });
-
   } catch (error) {
     console.error(
-      "Delete seller product error:",
+      "Update seller product status error:",
       error
     );
 
@@ -601,7 +669,6 @@ const deleteSellerProduct = async (req, res) => {
     });
   }
 };
-
 // ========================================
 // Toggle Product Active Status
 // ========================================
@@ -1440,7 +1507,7 @@ module.exports = {
   createSellerProduct,
   getMyProducts,
   updateSellerProduct,
-  deleteSellerProduct,
+  // deleteSellerProduct,
   toggleProductStatus,
   getSellerDashboardStats,
   getSellerProducts,
@@ -1450,6 +1517,7 @@ module.exports = {
   
   getSellerProfile,
   updateSellerProfile,
+  updateSellerProductStatus,
 
   getSellerOrderDetails,
 
