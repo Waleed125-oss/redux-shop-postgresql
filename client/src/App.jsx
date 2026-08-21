@@ -21,6 +21,9 @@ import Inventory from "./pages/Inventory";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import BecomeSeller from "./pages/BecomeSeller";
+import ShopBySeller from "./pages/ShopBySeller";
+import SellerStore from "./pages/SellerStore";
+
 
 // Admin Pages
 import AdminLayout from "./admin/components/AdminLayout";
@@ -49,6 +52,9 @@ import SellerOrders from "./seller/pages/SellerOrders";
 import SellerOrderDetails from "./seller/pages/SellerOrderDetails";
 import SellerProductApprovals from "./admin/pages/SellerProductApprovals";
 import SellerEditProduct from "./seller/pages/SellerEditProduct";
+import SellerList from "./admin/pages/SellerList";
+import SellerDetails from "./admin/pages/SellerDetails";
+
 
 function App() {
   const dispatch = useDispatch();
@@ -116,6 +122,16 @@ function App() {
         />
 
         <Route
+  path="/shop/sellers"
+  element={<ShopBySeller />}
+/>
+
+<Route
+  path="/shop/sellers/:sellerId"
+  element={<SellerStore />}
+/>
+
+        <Route
           path="/cart"
           element={
             <PrivateRoute>
@@ -166,6 +182,17 @@ function App() {
             </AdminRoute>
           }
         >
+
+          <Route
+  path="sellers"
+  element={<SellerList />}
+/>
+
+<Route
+  path="sellers/:id"
+  element={<SellerDetails />}
+/>
+
           <Route
             index
             element={<Dashboard />}

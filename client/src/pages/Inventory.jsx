@@ -7,7 +7,7 @@ import {
   ShoppingBag,
   Sparkles,
   Filter,
-  DollarSign,
+  Banknote,
   BarChart3,
   Star,
   ArrowLeftRight,
@@ -445,7 +445,7 @@ const handleApplyFilters = () => {
                   mb-1.5
                 "
               >
-                <DollarSign size={15} className="text-indigo-500" />
+                <Banknote size={15} className="text-indigo-500" />
                 Min Price
               </label>
 
@@ -464,7 +464,7 @@ const handleApplyFilters = () => {
                     font-medium
                   "
                 >
-                  $
+                  PKR
                 </span>
 
                 <input
@@ -538,7 +538,7 @@ const handleApplyFilters = () => {
                     font-medium
                   "
                 >
-                  $
+                  PKR
                 </span>
 
                 <input

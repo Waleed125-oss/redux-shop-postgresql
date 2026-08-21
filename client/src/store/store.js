@@ -11,6 +11,7 @@ import sellerApplicationReducer from "./slices/sellerApplicationSlice";
 import customerReducer from "./slices/customerSlice";
 import sellerReducer from "./slices/sellerSlice";
 import adminProductReducer from "./slices/adminProductSlice";
+import adminSellerReducer from "./slices/adminSellerSlice";
 export const store = configureStore({
   reducer: {
     products: productReducer,
@@ -25,5 +26,6 @@ export const store = configureStore({
     customers: customerReducer,
     seller: sellerReducer,
     adminProducts: adminProductReducer,
+    adminSellers: adminSellerReducer,
   },
 });

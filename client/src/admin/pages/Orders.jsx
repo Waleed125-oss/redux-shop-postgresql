@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaEye, FaClipboardList } from "react-icons/fa";
 
 import { fetchOrders } from "../../store/slices/orderSlice";
+import { formatPrice } from "../../services/currency";
 
 function Orders() {
   const dispatch = useDispatch();
@@ -192,14 +193,7 @@ function Orders() {
                     <td className="px-6 py-5">
 
                       <span className="font-semibold text-gray-800">
-                        $
-                        {Number(order.total_amount).toLocaleString(
-                          "en-US",
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          }
-                        )}
+                        {formatPrice(order.total_amount)}
                       </span>
 
                     </td>

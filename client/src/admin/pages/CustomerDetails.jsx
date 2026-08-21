@@ -7,8 +7,9 @@ import {
   FaUser,
   FaEnvelope,
   FaShoppingCart,
-  FaDollarSign,
+  FaMoneyBillWave,
 } from "react-icons/fa";
+import { formatPrice } from "../../services/currency";
 
 function CustomerDetails() {
 
@@ -262,10 +263,7 @@ function CustomerDetails() {
 
               <h2 className="text-3xl font-bold mt-2">
 
-                $
-                {Number(
-                  statistics.totalSpent
-                ).toLocaleString()}
+                {formatPrice(statistics.totalSpent)}
 
               </h2>
 
@@ -273,7 +271,7 @@ function CustomerDetails() {
 
             <div className="bg-green-100 text-green-600 p-4 rounded-xl">
 
-              <FaDollarSign size={25} />
+              <FaMoneyBillWave size={25} />
 
             </div>
 
@@ -360,10 +358,7 @@ function CustomerDetails() {
 
                     <td className="px-6 py-5 font-semibold">
 
-                      $
-                      {Number(
-                        order.total_amount
-                      ).toLocaleString()}
+                      {formatPrice(order.total_amount)}
 
                     </td>
 

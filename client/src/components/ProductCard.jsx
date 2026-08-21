@@ -3,6 +3,7 @@ const IMAGE_URL = import.meta.env.VITE_API_URL;
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
 import { Link } from "react-router-dom";
+import { formatPrice } from "../services/currency";
 
 
 
@@ -45,7 +46,7 @@ function ProductCard({ product }) {
         </span>
 
         <span className="text-blue-600 font-bold text-xl">
-          ${product.price}
+          {formatPrice(product.price)}
         </span>
 
       </div>

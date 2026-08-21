@@ -6,8 +6,8 @@ import {
   FaChevronDown,
   FaHome,
   FaSortAmountDown,
+  FaStore,
 } from "react-icons/fa";
-
 
 // =====================================================
 // CATEGORY ITEM
@@ -20,13 +20,11 @@ function CategoryItem({
   setOpenPath,
   level = 0,
 }) {
-
   const navigate = useNavigate();
 
   const children = categories.filter(
     (child) =>
-      String(child.parent_id) ===
-      String(category.id)
+      String(child.parent_id) === String(category.id)
   );
 
   const hasChildren = children.length > 0;
@@ -34,13 +32,11 @@ function CategoryItem({
   const isOpen =
     openPath[level] === category.id;
 
-
   // ===================================================
   // OPEN MENU
   // ===================================================
 
   const openMenu = () => {
-
     if (!hasChildren) {
       return;
     }
@@ -51,61 +47,32 @@ function CategoryItem({
     ]);
   };
 
-
   // ===================================================
   // CATEGORY CLICK
   // ===================================================
 
   const handleClick = () => {
+    navigate(`/inventory?category=${category.id}`);
 
-    /*
-      IMPORTANT:
-
-      Category clicks now go to the Inventory page.
-
-      Example:
-
-      Books → /inventory?category=5
-      Mobiles → /inventory?category=8
-      Samsung → /inventory?category=12
-
-      The Inventory page will read the category
-      from the URL and send it to the backend.
-    */
-
-    navigate(
-      `/inventory?category=${category.id}`
-    );
-
-
-    // Keep dropdown behavior
     if (hasChildren) {
-
       setOpenPath([
         ...openPath.slice(0, level),
         category.id,
       ]);
-
     } else {
-
       setOpenPath([]);
-
     }
-
   };
 
-
   return (
-
     <div
       className={
         level === 0
-          ? "relative h-full flex items-center"
+          ? "relative h-full flex items-center shrink-0"
           : "relative"
       }
       onMouseEnter={openMenu}
     >
-
       {/* =================================================
           CATEGORY BUTTON
       ================================================= */}
@@ -118,7 +85,8 @@ function CategoryItem({
           justify-between
           gap-2
           font-semibold
-          text-sm
+          text-xs
+          sm:text-sm
           whitespace-nowrap
           transition-all
           duration-200
@@ -127,8 +95,13 @@ function CategoryItem({
           ${
             level === 0
               ? `
-                px-5
-                h-10
+                px-3
+                sm:px-4
+                lg:px-5
+
+                h-9
+                sm:h-10
+
                 rounded-full
 
                 ${
@@ -154,7 +127,8 @@ function CategoryItem({
               `
               : `
                 w-full
-                px-5
+                px-4
+                sm:px-5
                 py-3
                 text-left
                 text-gray-300
@@ -164,18 +138,13 @@ function CategoryItem({
           }
         `}
       >
-
-        <span>
-          {category.name}
-        </span>
-
+        <span>{category.name}</span>
 
         {/* CHEVRON */}
 
         {hasChildren && (
-
           <FaChevronDown
-            size={9}
+            size={8}
             className={`
               shrink-0
               transition-transform
@@ -190,18 +159,14 @@ function CategoryItem({
               group-hover:text-blue-400
             `}
           />
-
         )}
-
       </button>
-
 
       {/* =================================================
           DROPDOWN
       ================================================= */}
 
       {hasChildren && isOpen && (
-
         <div
           className={`
             absolute
@@ -212,14 +177,18 @@ function CategoryItem({
                 : "top-0 left-full"
             }
 
-            w-64
+            w-56
+            sm:w-64
+
+            max-w-[calc(100vw-1rem)]
 
             bg-gray-950
 
             border
             border-white/10
 
-            rounded-2xl
+            rounded-xl
+            sm:rounded-2xl
 
             shadow-2xl
             shadow-black/50
@@ -234,28 +203,29 @@ function CategoryItem({
             overflow-visible
           `}
         >
-
           {/* =================================================
               DROPDOWN HEADER
           ================================================= */}
 
           <div
             className="
-              px-5
+              px-4
+              sm:px-5
               py-3
               border-b
               border-white/10
               bg-white/[0.03]
             "
           >
-
             <p
               className="
-                text-xs
+                text-[10px]
+                sm:text-xs
                 font-bold
                 uppercase
                 tracking-wider
                 text-blue-400
+                truncate
               "
             >
               {category.name}
@@ -263,23 +233,21 @@ function CategoryItem({
 
             <p
               className="
-                text-xs
+                text-[10px]
+                sm:text-xs
                 text-gray-500
                 mt-1
               "
             >
               Browse categories
             </p>
-
           </div>
-
 
           {/* =================================================
               CHILDREN
           ================================================= */}
 
           {children.map((child) => (
-
             <CategoryItem
               key={child.id}
               category={child}
@@ -288,17 +256,12 @@ function CategoryItem({
               setOpenPath={setOpenPath}
               level={level + 1}
             />
-
           ))}
-
         </div>
-
       )}
-
     </div>
   );
 }
-
 
 // =====================================================
 // MAIN CATEGORY NAV
@@ -308,7 +271,6 @@ function CategoryNav({
   sort,
   onSortChange,
 }) {
-
   const navigate = useNavigate();
 
   const {
@@ -316,7 +278,6 @@ function CategoryNav({
   } = useSelector(
     (state) => state.categories
   );
-
 
   // ===================================================
   // OPEN CATEGORY PATH
@@ -326,7 +287,6 @@ function CategoryNav({
     openPath,
     setOpenPath,
   ] = useState([]);
-
 
   // ===================================================
   // MAIN / PARENT CATEGORIES
@@ -338,22 +298,25 @@ function CategoryNav({
         !category.parent_id
     );
 
-
   // ===================================================
   // HOME
   // ===================================================
 
   const handleHomeClick = () => {
-
     navigate("/");
-
     setOpenPath([]);
-
   };
 
+  // ===================================================
+  // SHOP BY SELLER
+  // ===================================================
+
+  const handleShopBySeller = () => {
+    navigate("/shop/sellers");
+    setOpenPath([]);
+  };
 
   return (
-
     <div
       onMouseLeave={() => setOpenPath([])}
       className="
@@ -367,14 +330,14 @@ function CategoryNav({
         overflow-visible
       "
     >
-
       {/* =================================================
           TOP GRADIENT LINE
       ================================================= */}
 
       <div
         className="
-          h-[3px]
+          h-[2px]
+          sm:h-[3px]
           w-full
           bg-gradient-to-r
           from-blue-600
@@ -382,7 +345,6 @@ function CategoryNav({
           to-violet-600
         "
       />
-
 
       {/* =================================================
           NAV CONTAINER
@@ -392,21 +354,34 @@ function CategoryNav({
         className="
           max-w-7xl
           mx-auto
-          px-6
+          px-2
+          sm:px-4
+          lg:px-6
           overflow-visible
         "
       >
+        {/* =================================================
+            MOBILE/TABLET SCROLL CONTAINER
+        ================================================= */}
 
         <div
           className="
             flex
             items-center
-            gap-1.5
-            h-16
-            overflow-visible
+            gap-1
+            sm:gap-1.5
+            h-14
+            sm:h-16
+            overflow-x-auto
+            overflow-y-visible
+            scrollbar-hide
+            whitespace-nowrap
           "
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
         >
-
           {/* =================================================
               HOME
           ================================================= */}
@@ -416,37 +391,53 @@ function CategoryNav({
             className="
               flex
               items-center
-              gap-2
-              px-5
-              h-10
+              gap-1.5
+              sm:gap-2
+
+              px-3
+              sm:px-4
+              lg:px-5
+
+              h-9
+              sm:h-10
+
               rounded-full
+
               font-semibold
-              text-sm
+
+              text-xs
+              sm:text-sm
+
               text-gray-300
+
               whitespace-nowrap
+
               hover:text-white
               hover:bg-white/10
+
               transition-all
               duration-200
+
               group
               shrink-0
             "
           >
-
             <FaHome
-              size={13}
+              size={12}
               className="
+                sm:w-[13px]
+                sm:h-[13px]
+
                 text-gray-500
                 group-hover:text-blue-400
+
                 transition-colors
                 duration-200
               "
             />
 
             Home
-
           </button>
-
 
           {/* =================================================
               DIVIDER
@@ -454,24 +445,32 @@ function CategoryNav({
 
           <span
             className="
-              h-6
+              h-5
+              sm:h-6
               w-px
               bg-white/10
-              mx-1
+              mx-0.5
+              sm:mx-1
               shrink-0
             "
           />
-
 
           {/* =================================================
               MAIN CATEGORIES
           ================================================= */}
 
-          <div className="flex items-center gap-1.5 flex-1">
-
+          <div
+            className="
+              flex
+              items-center
+              gap-1
+              sm:gap-1.5
+              flex-1
+              min-w-max
+            "
+          >
             {parentCategories.map(
               (category) => (
-
                 <CategoryItem
                   key={category.id}
                   category={category}
@@ -480,12 +479,72 @@ function CategoryNav({
                   setOpenPath={setOpenPath}
                   level={0}
                 />
-
               )
             )}
 
-          </div>
+            {/* =================================================
+                SHOP BY SELLER
+            ================================================= */}
 
+            <button
+              onClick={handleShopBySeller}
+              className="
+                flex
+                items-center
+                gap-1.5
+                sm:gap-2
+
+                px-3
+                sm:px-4
+                lg:px-5
+
+                h-9
+                sm:h-10
+
+                rounded-full
+
+                font-semibold
+
+                text-xs
+                sm:text-sm
+
+                text-gray-300
+
+                whitespace-nowrap
+
+                hover:text-white
+
+                hover:bg-gradient-to-r
+                hover:from-blue-600
+                hover:to-indigo-600
+
+                hover:shadow-md
+                hover:shadow-blue-600/30
+
+                transition-all
+                duration-200
+
+                group
+                shrink-0
+              "
+            >
+              <FaStore
+                size={12}
+                className="
+                  sm:w-[13px]
+                  sm:h-[13px]
+
+                  text-gray-500
+                  group-hover:text-blue-400
+
+                  transition-colors
+                  duration-200
+                "
+              />
+
+              Shop by Seller
+            </button>
+          </div>
 
           {/* =================================================
               SORTING
@@ -497,17 +556,23 @@ function CategoryNav({
               flex
               items-center
               shrink-0
-              ml-auto
+              ml-1
+              sm:ml-auto
+
+              bg-gray-950
             "
           >
-
             <FaSortAmountDown
               className="
                 absolute
-                left-3
+                left-2.5
+                sm:left-3
+
                 text-gray-400
                 pointer-events-none
-                text-xs
+
+                text-[10px]
+                sm:text-xs
               "
             />
 
@@ -518,24 +583,43 @@ function CategoryNav({
               }
               className="
                 appearance-none
+
                 bg-gray-900
+
                 border
                 border-white/10
+
                 text-gray-300
-                text-sm
+
+                text-xs
+                sm:text-sm
+
                 font-medium
+
                 rounded-full
-                pl-9
-                pr-8
-                py-2.5
+
+                pl-8
+                sm:pl-9
+
+                pr-7
+                sm:pr-8
+
+                py-2
+                sm:py-2.5
+
                 outline-none
+
                 cursor-pointer
+
                 hover:border-blue-500/50
                 focus:border-blue-500
+
                 transition
+
+                max-w-[145px]
+                sm:max-w-none
               "
             >
-
               <option
                 value=""
                 className="bg-gray-900"
@@ -570,15 +654,10 @@ function CategoryNav({
               >
                 Title: Z → A
               </option>
-
             </select>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-  FaDollarSign,
+  FaMoneyBillWave,
   FaShoppingCart,
   FaBoxOpen,
   FaUsers,
@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 
 import { fetchDashboard } from "../../store/slices/adminDashboardSlice";
+import { formatPrice } from "../../services/currency";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -96,8 +97,8 @@ function Dashboard() {
   const stats = [
     {
       title: "Total Revenue",
-      value: `$${Number(statistics.revenue).toLocaleString()}`,
-      icon: <FaDollarSign size={22} />,
+      value: formatPrice(statistics.revenue),
+      icon: <FaMoneyBillWave size={22} />,
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
     },
@@ -348,8 +349,7 @@ function Dashboard() {
                     </td>
 
                     <td className="px-6 py-5 font-semibold text-gray-800">
-                      $
-                      {Number(order.total_amount).toLocaleString()}
+                      {formatPrice(order.total_amount)}
                     </td>
 
                     <td className="px-6 py-5">
@@ -427,7 +427,7 @@ function Dashboard() {
                 <div className="flex justify-between text-sm">
 
                   <span className="font-semibold">
-                    ${Number(order.total_amount).toLocaleString()}
+                    {formatPrice(order.total_amount)}
                   </span>
 
                   <span className="text-gray-500">

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchOrders } from "../store/slices/orderSlice";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { formatPrice } from "../services/currency";
 
 function Orders() {
   const dispatch = useDispatch();
@@ -54,7 +55,7 @@ function Orders() {
                   </h2>
 
                   <p className="text-gray-500">
-                    Total: ${order.total_amount}
+                    Total: {formatPrice(order.total_amount)}
                   </p>
 
                   <p className="text-gray-500">

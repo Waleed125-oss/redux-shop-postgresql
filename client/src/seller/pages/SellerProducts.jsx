@@ -6,6 +6,7 @@ import {
   fetchSellerProducts,
   toggleSellerProductStatus,
 } from "../../store/slices/sellerSlice";
+import { formatPrice } from "../../services/currency";
 
 function SellerProducts() {
 
@@ -173,10 +174,7 @@ function SellerProducts() {
 
 
                   <td className="px-6 py-4">
-                    Rs.{" "}
-                    {Number(
-                      product.price
-                    ).toLocaleString()}
+                    {formatPrice(product.price)}
                   </td>
 
 

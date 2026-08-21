@@ -7,6 +7,8 @@ const {
   getSellerApplications,
   approveSeller,
   rejectSeller,
+  getApprovedSellers,
+  getSellerDetails,
 } = require("../controllers/adminController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -19,6 +21,28 @@ router.get(
   authMiddleware,
   adminMiddleware,
   getDashboardStats
+);
+
+// ========================================
+// APPROVED SELLER LIST
+// ========================================
+
+router.get(
+  "/sellers",
+  authMiddleware,
+  adminMiddleware,
+  getApprovedSellers
+);
+
+// ========================================
+// SELLER DETAILS
+// ========================================
+
+router.get(
+  "/sellers/:id",
+  authMiddleware,
+  adminMiddleware,
+  getSellerDetails
 );
 
 

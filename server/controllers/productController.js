@@ -449,25 +449,58 @@ const getSingleProduct = async (req, res) => {
 
     // ================= GET PRODUCT =================
 
+    // const result = await pool.query(
+    //   `
+    //   SELECT
+    //     p.*,
+    //     c.name AS category
+
+    //   FROM products p
+
+    //   LEFT JOIN categories c
+    //   ON p.category_id = c.id
+
+    //   WHERE
+    //     p.id = $1
+
+    //   AND
+    //     ($2 = TRUE OR p.is_active = TRUE)
+    //   `,
+    //   [id, admin]
+    // );
+
     const result = await pool.query(
-      `
-      SELECT
-        p.*,
-        c.name AS category
+  `
+  SELECT
+    p.*,
+    c.name AS category,
 
-      FROM products p
+    CASE
+      WHEN u.id IS NOT NULL THEN
+        json_build_object(
+          'id', u.id,
+          'name', u.name
+         
+        )
+      ELSE NULL
+    END AS seller
 
-      LEFT JOIN categories c
-      ON p.category_id = c.id
+  FROM products p
 
-      WHERE
-        p.id = $1
+  LEFT JOIN categories c
+    ON p.category_id = c.id
 
-      AND
-        ($2 = TRUE OR p.is_active = TRUE)
-      `,
-      [id, admin]
-    );
+  LEFT JOIN users u
+    ON p.seller_id = u.id
+
+  WHERE
+    p.id = $1
+
+  AND
+    ($2 = TRUE OR p.is_active = TRUE)
+  `,
+  [id, admin]
+);
 
 
     if (result.rows.length === 0) {

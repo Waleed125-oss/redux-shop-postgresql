@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSellerDashboardStats,
 } from "../../store/slices/sellerSlice";
+import { formatPrice } from "../../services/currency";
 
 function SellerDashboard() {
   const dispatch = useDispatch();
@@ -128,7 +129,7 @@ function SellerDashboard() {
           </p>
 
           <h2 className="text-3xl font-bold mt-2">
-            Rs. {Number(totalRevenue).toLocaleString()}
+            {formatPrice(totalRevenue)}
           </h2>
 
         </div>

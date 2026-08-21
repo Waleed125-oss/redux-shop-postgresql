@@ -963,3 +963,102 @@ export const updateSellerProductStatusAPI = async (
 
   return data;
 };
+
+
+// ================= ADMIN SELLERS =================
+
+// GET APPROVED SELLERS
+// ================= ADMIN SELLERS =================
+
+// GET APPROVED SELLERS
+export const fetchApprovedSellersAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/admin/sellers`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to fetch approved sellers"
+    );
+  }
+
+  return data;
+};
+
+// ================= ADMIN SELLER DETAILS =================
+
+// GET SELLER DETAILS
+
+export const fetchSellerDetailsAPI = async (id) => {
+  const response = await fetch(
+    `${BASE_URL}/admin/sellers/${id}`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to fetch seller details"
+    );
+  }
+
+  return data;
+};
+
+
+// ================= SHOP BY SELLER =================
+
+// GET ALL PUBLIC SELLERS
+
+// ================= SHOP BY SELLER =================
+
+// GET ALL PUBLIC SELLERS
+export const fetchAllSellersAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/shop/sellers`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to fetch sellers"
+    );
+  }
+
+  return data;
+};
+
+
+// GET SINGLE SELLER STORE
+export const fetchSellerStoreAPI = async (
+  sellerId
+) => {
+  const response = await fetch(
+    `${BASE_URL}/shop/sellers/${sellerId}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to fetch seller store"
+    );
+  }
+
+  return data;
+};
+
+

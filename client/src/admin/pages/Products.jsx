@@ -14,6 +14,7 @@ import {
 } from "../../store/slices/productSlice";
 
 import { fetchCategories } from "../../store/slices/categorySlice";
+import { formatPrice } from "../../services/currency";
 
 import { Link, useLocation } from "react-router-dom";
 
@@ -646,10 +647,7 @@ const handlePermanentDelete = async (product) => {
 
                       <span className="font-semibold text-gray-800">
 
-                        $
-                        {Number(
-                          product.price
-                        ).toLocaleString()}
+                        {formatPrice(product.price)}
 
                       </span>
 

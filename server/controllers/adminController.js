@@ -308,10 +308,191 @@ const rejectSeller = async (req, res) => {
   }
 };
 
+// ========================================
+// GET APPROVED SELLERS WITH PRODUCTS
+// ========================================
+
+// ========================================
+// Get approved sellers
+// ========================================
+
+// ========================================
+// Get approved sellers
+// ========================================
+
+const getApprovedSellers = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        u.id,
+        u.name,
+        u.email,
+
+        sa.business_name,
+        sa.phone,
+        sa.description,
+        sa.updated_at AS approved_at,
+
+        COUNT(p.id) AS product_count
+
+      FROM users u
+
+      LEFT JOIN seller_applications sa
+        ON sa.user_id = u.id
+        AND sa.status = 'approved'
+
+      LEFT JOIN products p
+        ON p.seller_id = u.id
+        AND p.approval_status = 'approved'
+
+      WHERE u.role = 'seller'
+
+      GROUP BY
+        u.id,
+        u.name,
+        u.email,
+        sa.business_name,
+        sa.phone,
+        sa.description,
+        sa.updated_at
+
+      ORDER BY u.name ASC
+    `);
+
+    res.json({
+      sellers: result.rows,
+    });
+
+  } catch (error) {
+    console.error(
+      "Get approved sellers error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Failed to fetch approved sellers",
+      error: error.message,
+    });
+  }
+};
+
+
+// ========================================
+// GET APPROVED SELLER DETAILS
+// ========================================
+const getSellerDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // ========================================
+    // GET SELLER INFORMATION
+    // ========================================
+    const sellerResult = await pool.query(
+      `
+      SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.role,
+        sa.business_name,
+        sa.phone,
+        sa.description,
+        sa.status AS seller_status,
+        sa.created_at AS application_date
+      FROM users u
+      LEFT JOIN seller_applications sa
+        ON sa.user_id = u.id
+      WHERE u.id = $1
+        AND u.role = 'seller'
+      `,
+      [id]
+    );
+
+    if (sellerResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Seller not found",
+      });
+    }
+
+    const seller = sellerResult.rows[0];
+
+    // ========================================
+    // GET SELLER PRODUCTS
+    // ========================================
+   const productsResult = await pool.query(
+  `
+  SELECT
+    p.id,
+    p.title,
+    p.price,
+    p.description,
+    p.image,
+    p.rating,
+    p.is_active,
+    p.approval_status,
+    p.created_at,
+    p.category_id,
+    c.name AS category_name
+  FROM products p
+  LEFT JOIN categories c
+    ON p.category_id = c.id
+  WHERE p.seller_id = $1
+  ORDER BY p.created_at DESC
+  `,
+  [id]
+);
+
+    // ========================================
+    // PRODUCT STATISTICS
+    // ========================================
+    const totalProducts = productsResult.rows.length;
+
+    const approvedProducts = productsResult.rows.filter(
+      (product) =>
+        product.approval_status === "approved"
+    ).length;
+
+    const pendingProducts = productsResult.rows.filter(
+      (product) =>
+        product.approval_status === "pending"
+    ).length;
+
+    const rejectedProducts = productsResult.rows.filter(
+      (product) =>
+        product.approval_status === "rejected"
+    ).length;
+
+    // ========================================
+    // RESPONSE
+    // ========================================
+    res.json({
+      seller,
+      statistics: {
+        totalProducts,
+        approvedProducts,
+        pendingProducts,
+        rejectedProducts,
+      },
+      products: productsResult.rows,
+    });
+
+  } catch (error) {
+    console.error(
+      "Get seller details error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Failed to fetch seller details",
+    });
+  }
+};
 
 module.exports = {
   getDashboardStats,
   getSellerApplications,
   approveSeller,
   rejectSeller,
+  getApprovedSellers,
+  getSellerDetails,
 };

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { fetchSingleOrder } from "../store/slices/orderSlice";
 import Navbar from "../components/Navbar";
+import { formatPrice } from "../services/currency";
 
 function MyOrderDetails() {
 
@@ -225,7 +226,7 @@ function MyOrderDetails() {
 
                     <td className="p-4">
 
-                      ${Number(item.price).toLocaleString()}
+                      {formatPrice(item.price)}
 
                     </td>
 
@@ -246,10 +247,7 @@ function MyOrderDetails() {
 
             <div className="text-xl font-bold">
 
-              Total: $
-              {Number(
-                selectedOrder.order.total_amount
-              ).toLocaleString()}
+              Total: {formatPrice(selectedOrder.order.total_amount)}
 
             </div>
 

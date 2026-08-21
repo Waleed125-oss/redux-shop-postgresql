@@ -6,6 +6,7 @@ const cors = require("cors");
 const pool = require("./config/db");
 
 const productRoutes = require("./routes/productRoutes");
+const shopRoutes = require("./routes/shopRoutes");
 const productImageRoutes = require("./routes/productImageRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/shop", shopRoutes);
 app.use("/api/product-images", productImageRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);

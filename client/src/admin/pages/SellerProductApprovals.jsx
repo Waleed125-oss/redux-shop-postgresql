@@ -7,6 +7,7 @@ import {
   approveSellerProduct,
   rejectSellerProduct,
 } from "../../store/slices/adminProductSlice";
+import { formatPrice } from "../../services/currency";
 
 function SellerProductApprovals() {
   const dispatch = useDispatch();
@@ -250,10 +251,7 @@ function SellerProductApprovals() {
 
                   <td className="px-6 py-4">
 
-                    Rs.{" "}
-                    {Number(
-                      product.price
-                    ).toLocaleString()}
+                    {formatPrice(product.price)}
 
                   </td>
 

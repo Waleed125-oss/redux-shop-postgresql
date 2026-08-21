@@ -6,6 +6,7 @@ import {
   fetchSingleOrder,
   updateOrderStatus,
 } from "../../store/slices/orderSlice";
+import { formatPrice } from "../../services/currency";
 
 function OrderDetails() {
 
@@ -112,7 +113,7 @@ function OrderDetails() {
 
                 <td className="p-3">
 
-                  ${item.price}
+                  {formatPrice(item.price)}
 
                 </td>
 
@@ -125,8 +126,7 @@ function OrderDetails() {
         </table>
 
         <h2 className="text-xl font-bold mb-4">
-          Total: $
-          {selectedOrder.order.total_amount}
+          Total: {formatPrice(selectedOrder.order.total_amount)}
         </h2>
 
         <div className="flex gap-4 items-center">

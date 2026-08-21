@@ -11,6 +11,7 @@ import {
 } from "../store/slices/cartSlice";
 
 import Navbar from "../components/Navbar";
+import { formatPrice } from "../services/currency";
 
 function Cart() {
   const dispatch = useDispatch();
@@ -80,7 +81,7 @@ function Cart() {
                     </h2>
 
                     <p className="text-blue-600 font-semibold mt-2">
-                      ${item.price}
+                      {formatPrice(item.price)}
                     </p>
 
                     <div className="flex items-center gap-3 mt-4">
@@ -147,7 +148,7 @@ function Cart() {
 
             <div className="flex justify-between mb-4">
               <span>Subtotal</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
 
             <div className="flex justify-between mb-4">
@@ -161,7 +162,7 @@ function Cart() {
 
             <div className="flex justify-between text-xl font-bold">
               <span>Total</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
 
             <button

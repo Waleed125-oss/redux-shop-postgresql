@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchOrders } from "../store/slices/orderSlice";
+import { formatPrice } from "../services/currency";
 
 function MyOrders() {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ function MyOrders() {
         >
           <h2>Order #{order.id}</h2>
           <p>Status: {order.status}</p>
-          <p>Total: ${order.total_amount}</p>
+          <p>Total: {formatPrice(order.total_amount)}</p>
         </div>
       ))}
     </div>

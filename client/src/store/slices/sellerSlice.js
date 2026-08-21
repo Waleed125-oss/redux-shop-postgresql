@@ -9,7 +9,6 @@ import {
   createSellerProductAPI,
   fetchSellerOrdersAPI,
   fetchSellerOrderDetailAPI,
-  // deleteProductAPI,
   fetchSingleProductAPI,
   updateSellerProductAPI,
   updateSellerProductStatusAPI,
@@ -198,30 +197,6 @@ export const toggleSellerProductStatus =
     }
   );
 
-// ========================================
-// DELETE SELLER PRODUCT
-// ========================================
-
-// export const deleteSellerProduct =
-//   createAsyncThunk(
-//     "seller/deleteProduct",
-//     async (id, { rejectWithValue }) => {
-//       try {
-//         const result =
-//           await deleteProductAPI(id);
-
-//         return {
-//           id,
-//           result,
-//         };
-//       } catch (error) {
-//         return rejectWithValue(
-//           error.message ||
-//             "Failed to delete seller product"
-//         );
-//       }
-//     }
-//   );
 
 // ========================================
 // FETCH SINGLE PRODUCT
@@ -520,9 +495,11 @@ const sellerSlice = createSlice({
               );
 
             if (index !== -1) {
-              state.products[index] =
-                updatedProduct;
-            }
+  state.products[index] = {
+    ...state.products[index],
+    ...updatedProduct,
+  };
+}
           }
         }
       )
@@ -564,8 +541,10 @@ const sellerSlice = createSlice({
         );
 
       if (index !== -1) {
-        state.products[index] =
-          updatedProduct;
+        state.products[index] = {
+          ...state.products[index],
+          ...updatedProduct,
+        };
       }
     }
   }

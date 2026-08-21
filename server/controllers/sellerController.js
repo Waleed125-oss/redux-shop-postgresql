@@ -1507,7 +1507,7 @@ module.exports = {
   createSellerProduct,
   getMyProducts,
   updateSellerProduct,
-  // deleteSellerProduct,
+ 
   toggleProductStatus,
   getSellerDashboardStats,
   getSellerProducts,

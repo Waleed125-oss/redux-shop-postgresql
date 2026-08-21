@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import Navbar from "../components/Navbar";
 import { addToCart } from "../store/slices/cartSlice";
 import { fetchSingleProduct } from "../store/slices/productSlice";
+import { formatPrice } from "../services/currency";
 
 function ProductDetails() {
 
@@ -286,14 +287,25 @@ function ProductDetails() {
             </div>
 
 
+            {/* ================= SELLER ================= */}
+
+{product.seller && (
+  <div className="flex items-center gap-2 text-gray-600">
+    <span className="font-medium text-gray-900">
+      Sold by:
+    </span>
+
+    <span className="text-blue-600 font-semibold">
+      {product.seller.name}
+    </span>
+  </div>
+)}
+
+
             {/* PRICE */}
 
             <p className="text-4xl font-bold text-blue-600">
-
-              $
-              {Number(
-                product.price
-              ).toLocaleString()}
+              {formatPrice(product.price)}
 
             </p>
 
