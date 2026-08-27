@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { fetchSingleOrder } from "../store/slices/orderSlice";
 import Navbar from "../components/Navbar";
 import { formatPrice } from "../services/currency";
+import { requestRefundAPI } from "../services/api";
 
 function MyOrderDetails() {
+
+  
 
   const { id } = useParams();
 
@@ -20,6 +23,12 @@ function MyOrderDetails() {
     (state) => state.orders
   );
 
+  const [refundReason, setRefundReason] = useState("");
+const [showRefundForm, setShowRefundForm] = useState(false);
+const [refundLoading, setRefundLoading] = useState(false);
+const [refundError, setRefundError] = useState("");
+const [refundSuccess, setRefundSuccess] = useState("");
+
 
   // ================= FETCH ORDER =================
 
@@ -29,6 +38,39 @@ function MyOrderDetails() {
 
   }, [dispatch, id]);
 
+
+  const handleRefundSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!refundReason.trim()) {
+    setRefundError("Please provide a reason for the refund.");
+    return;
+  }
+
+  try {
+    setRefundLoading(true);
+    setRefundError("");
+    setRefundSuccess("");
+
+    const data = await requestRefundAPI(
+      selectedOrder.order.id,
+      refundReason
+    );
+
+    setRefundSuccess(
+      data.message || "Refund request submitted successfully."
+    );
+
+    setShowRefundForm(false);
+    setRefundReason("");
+  } catch (error) {
+    setRefundError(
+      error.message || "Failed to submit refund request."
+    );
+  } finally {
+    setRefundLoading(false);
+  }
+};
 
   // ================= LOADING =================
 
@@ -137,6 +179,126 @@ function MyOrderDetails() {
             >
               {selectedOrder.order.status}
             </span>
+
+            {/* ================= REFUND ================= */}
+
+<div className="mt-6">
+
+  {selectedOrder.order.payment_status === "paid" && (
+    <button
+      type="button"
+      onClick={() => {
+        setShowRefundForm(true);
+        setRefundError("");
+        setRefundSuccess("");
+      }}
+      className="
+        bg-red-600
+        text-white
+        px-5
+        py-2
+        rounded-lg
+        hover:bg-red-700
+        transition
+      "
+    >
+      Request Refund
+    </button>
+
+    
+  )}
+  {/* ================= REFUND FORM ================= */}
+
+{showRefundForm && (
+  <div className="mt-5 border rounded-lg p-5 bg-gray-50">
+
+    <h3 className="text-lg font-semibold mb-4">
+      Request Refund
+    </h3>
+
+    <form onSubmit={handleRefundSubmit}>
+
+      <label className="block text-gray-700 font-medium mb-2">
+        Reason for refund
+      </label>
+
+      <textarea
+        value={refundReason}
+        onChange={(e) => setRefundReason(e.target.value)}
+        placeholder="Please explain why you want a refund..."
+        rows="4"
+        className="
+          w-full
+          border
+          rounded-lg
+          p-3
+          focus:outline-none
+          focus:ring-2
+          focus:ring-blue-500
+        "
+      />
+
+      {refundError && (
+        <p className="text-red-600 mt-2">
+          {refundError}
+        </p>
+      )}
+
+      <div className="flex gap-3 mt-4">
+
+        <button
+          type="submit"
+          disabled={refundLoading}
+          className="
+            bg-blue-600
+            text-white
+            px-5
+            py-2
+            rounded-lg
+            hover:bg-blue-700
+            disabled:opacity-50
+          "
+        >
+          {refundLoading
+            ? "Submitting..."
+            : "Submit Refund Request"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowRefundForm(false);
+            setRefundReason("");
+            setRefundError("");
+          }}
+          className="
+            bg-gray-300
+            text-gray-800
+            px-5
+            py-2
+            rounded-lg
+            hover:bg-gray-400
+          "
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+)}
+{refundSuccess && (
+  <div className="mt-5 p-4 bg-green-50 border border-green-200 rounded-lg">
+    <p className="text-green-700 font-medium">
+      {refundSuccess}
+    </p>
+  </div>
+)}
+
+
+
+</div>
 
           </div>
 

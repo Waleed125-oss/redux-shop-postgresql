@@ -16,13 +16,30 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const adminCustomerRoutes = require("./routes/adminCustomerRoutes");
 const sellerRoutes = require("./routes/sellerRoutes")
+const paymentRoutes = require("./routes/paymentRoutes");
+const refundRoutes = require("./routes/refundRoutes");
+
 const path = require("path");
 
 
 const app = express();
 
 app.use(cors());
+
+// ======================================================
+// STRIPE WEBHOOK
+// MUST COME BEFORE express.json()
+// ======================================================
+app.use(
+  "/api/payment/webhook",
+  express.raw({ type: "application/json" })
+);
+
+// ======================================================
+// NORMAL JSON REQUESTS
+// ======================================================
 app.use(express.json());
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/seller", sellerRoutes);
@@ -34,7 +51,13 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/customers", adminCustomerRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/payment", paymentRoutes);
+app.use("/api/refunds", refundRoutes);
+
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
 app.get("/", (req, res) => {
   res.send("Redux Shop PostgreSQL Backend Running...");

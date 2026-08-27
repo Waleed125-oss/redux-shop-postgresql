@@ -10,6 +10,7 @@ import {
   FaStore,
   FaCheckCircle,
   FaArrowLeft,
+  FaUndo,
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
@@ -47,6 +48,11 @@ function Sidebar() {
       name: "Sellers",
       icon: <FaStore />,
     },
+    {
+  name: "Refund Requests",
+  icon: <FaUndo />,
+  path: "/admin/refunds",
+},
     {
       name: "Settings",
       icon: <FaCog />,

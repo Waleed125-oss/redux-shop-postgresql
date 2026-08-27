@@ -2,7 +2,7 @@ import { createSlice,
    createAsyncThunk,
  } from "@reduxjs/toolkit";
 
-import { fetchCartAPI, addToCartAPI, updateCartAPI, deleteCartAPI, checkoutAPI } from "../../services/api"; 
+import { fetchCartAPI, addToCartAPI, updateCartAPI, deleteCartAPI, checkoutAPI, createStripeCheckoutAPI } from "../../services/api"; 
 
 const initialState = {
   cartItems: [],
@@ -30,6 +30,15 @@ export const updateQuantity = createAsyncThunk(
   async ({ id, quantity }, { dispatch }) => {
     await updateCartAPI(id, quantity);
     dispatch(fetchCart());
+  }
+);
+
+export const createStripeCheckout = createAsyncThunk(
+  "cart/createStripeCheckout",
+  async () => {
+    const result = await createStripeCheckoutAPI();
+
+    return result;
   }
 );
 
@@ -129,7 +138,21 @@ const cartSlice = createSlice({
     .addCase(checkout.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message;
-    });
+    })
+
+    .addCase(createStripeCheckout.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+
+.addCase(createStripeCheckout.fulfilled, (state) => {
+  state.loading = false;
+})
+
+.addCase(createStripeCheckout.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.error.message;
+});
     
 
 },

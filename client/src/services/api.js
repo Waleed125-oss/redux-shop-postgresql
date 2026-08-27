@@ -1,5 +1,5 @@
 
-
+import axios from "axios";
 const BASE_URL = "http://localhost:5000/api";
 
 
@@ -1062,3 +1062,171 @@ export const fetchSellerStoreAPI = async (
 };
 
 
+// ================= STRIPE CHECKOUT =================
+
+export const createStripeCheckoutAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/payment/create-checkout-session`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to create Stripe checkout session"
+    );
+  }
+
+  return data;
+};
+
+// ================= REFUNDS =================
+
+// CUSTOMER REQUEST REFUND
+
+export const requestRefundAPI = async (orderId, reason) => {
+  const response = await fetch(
+    `${BASE_URL}/refunds/request/${orderId}`,
+    {
+      method: "POST",
+      headers: getJsonAuthHeaders(),
+      body: JSON.stringify({
+        reason,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to submit refund request"
+    );
+  }
+
+  return data;
+};
+
+export const getCustomerRefundRequestsAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/refunds/mine`,
+    {
+      method: "GET",
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to fetch your refund requests"
+    );
+  }
+
+  return data;
+};
+
+
+// ======================================================
+// GET ADMIN REFUND REQUESTS
+// ======================================================
+
+export const getAdminRefundRequestsAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/refunds/admin`,
+    {
+      method: "GET",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to fetch refund requests"
+    );
+  }
+
+  return data;
+};
+
+
+// ======================================================
+// APPROVE ADMIN REFUND
+// ======================================================
+
+export const approveAdminRefundAPI = async (refundId) => {
+  const response = await fetch(
+    `${BASE_URL}/refunds/admin/${refundId}/approve`,
+    {
+      method: "PUT",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to approve refund"
+    );
+  }
+
+  return data;
+};
+
+
+// ======================================================
+// GET SELLER REFUND REQUESTS
+// ======================================================
+
+export const getSellerRefundRequestsAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/refunds/seller`,
+    {
+      method: "GET",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to fetch refund requests"
+    );
+  }
+
+  return data;
+};
+
+
+// ======================================================
+// APPROVE SELLER REFUND
+// ======================================================
+
+export const approveSellerRefundAPI = async (refundId) => {
+  const response = await fetch(
+    `${BASE_URL}/refunds/seller/${refundId}/approve`,
+    {
+      method: "PUT",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to approve refund"
+    );
+  }
+
+  return data;
+};

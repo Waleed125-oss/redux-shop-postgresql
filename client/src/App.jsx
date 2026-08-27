@@ -23,6 +23,7 @@ import ResetPassword from "./pages/ResetPassword";
 import BecomeSeller from "./pages/BecomeSeller";
 import ShopBySeller from "./pages/ShopBySeller";
 import SellerStore from "./pages/SellerStore";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 
 // Admin Pages
@@ -37,7 +38,11 @@ import OrderDetails from "./admin/pages/OrderDetails";
 import Categories from "./admin/pages/Categories";
 import Customers from "./admin/pages/Customers";
 import CustomerDetails from "./admin/pages/CustomerDetails";
+import AdminRefundRequests from "./admin/pages/RefundRequests";
+
 import MyOrderDetails from "./pages/MyOrderDetails";
+
+
 
 // Route Protection
 import PrivateRoute from "./components/PrivateRoute";
@@ -52,6 +57,7 @@ import SellerOrders from "./seller/pages/SellerOrders";
 import SellerOrderDetails from "./seller/pages/SellerOrderDetails";
 import SellerProductApprovals from "./admin/pages/SellerProductApprovals";
 import SellerEditProduct from "./seller/pages/SellerEditProduct";
+import SellerRefundRequests from "./seller/pages/RefundRequests";
 import SellerList from "./admin/pages/SellerList";
 import SellerDetails from "./admin/pages/SellerDetails";
 
@@ -162,6 +168,14 @@ function App() {
     </PrivateRoute>
   }
 />
+    <Route
+  path="/payment-success"
+  element={
+    <PrivateRoute>
+      <PaymentSuccess />
+    </PrivateRoute>
+  }
+/>
 
         <Route
   path="/my-orders"
@@ -182,6 +196,11 @@ function App() {
             </AdminRoute>
           }
         >
+
+          <Route
+  path="refunds"
+  element={<AdminRefundRequests />}
+/>
 
           <Route
   path="sellers"
@@ -254,7 +273,6 @@ function App() {
         {/* ================= SELLER ROUTES ================= */}
 
        {/* ================= SELLER ROUTES ================= */}
-       ```jsx
 {/* ================= SELLER ROUTES ================= */}
 
 <Route
@@ -276,6 +294,11 @@ function App() {
     path="products"
     element={<SellerProducts />}
   />
+
+  <Route
+  path="refunds"
+  element={<SellerRefundRequests />}
+/>
 
   {/* Add Product */}
   <Route
@@ -312,7 +335,6 @@ function App() {
     }
   />
 </Route>
-```
 
       </Routes>
     </BrowserRouter>

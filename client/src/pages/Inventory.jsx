@@ -460,8 +460,11 @@ const handleApplyFilters = () => {
                     top-1/2
                     -translate-y-1/2
                     text-slate-400
-                    text-sm
+                    text-xs
                     font-medium
+                    bg-white
+                    pr-1
+                    z-10
                   "
                 >
                   PKR
@@ -484,7 +487,7 @@ const handleApplyFilters = () => {
                     border
                     border-slate-200
                     rounded-xl
-                    pl-7
+                    pl-12
                     pr-3
                     py-2.5
                     text-sm
@@ -534,8 +537,11 @@ const handleApplyFilters = () => {
                     top-1/2
                     -translate-y-1/2
                     text-slate-400
-                    text-sm
+                    text-xs
                     font-medium
+                    bg-white
+                    pr-1
+                    z-10
                   "
                 >
                   PKR
@@ -558,7 +564,7 @@ const handleApplyFilters = () => {
                     border
                     border-slate-200
                     rounded-xl
-                    pl-7
+                    pl-12
                     pr-3
                     py-2.5
                     text-sm

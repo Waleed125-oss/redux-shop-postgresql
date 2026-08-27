@@ -5,6 +5,7 @@ import {
   FaBox,
   FaClipboardList,
   FaCog,
+  FaUndo,
 } from "react-icons/fa";
 
 function SellerSidebar() {
@@ -25,6 +26,11 @@ function SellerSidebar() {
       path: "/seller/orders",
       icon: <FaClipboardList />,
     },
+      {
+  name: "Refund Requests",
+  icon: <FaUndo />,
+  path: "/seller/refunds",
+},
     {
       name: "Settings",
       path: "/seller/settings",

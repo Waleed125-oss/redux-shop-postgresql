@@ -8,6 +8,7 @@ import {
   updateQuantity,
   deleteItem,
   checkout,
+  createStripeCheckout,
 } from "../store/slices/cartSlice";
 
 import Navbar from "../components/Navbar";
@@ -27,16 +28,35 @@ function Cart() {
     0
   );
 
+  // const handleCheckout = async () => {
+  //   try {
+  //     const result = await dispatch(checkout()).unwrap();
+
+  //     alert(result.message);
+
+  //   } catch (error) {
+  //     alert(error);
+  //   }
+  // };
+
+
   const handleCheckout = async () => {
-    try {
-      const result = await dispatch(checkout()).unwrap();
+  try {
+    const result = await dispatch(
+      createStripeCheckout()
+    ).unwrap();
 
-      alert(result.message);
-
-    } catch (error) {
-      alert(error);
+    if (result.url) {
+      window.location.href = result.url;
+    } else {
+      alert("Stripe checkout URL not received.");
     }
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert(error);
+  }
+};
 
   return (
     <>

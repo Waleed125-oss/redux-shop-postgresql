@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -21,6 +21,9 @@ function CategoryItem({
   level = 0,
 }) {
   const navigate = useNavigate();
+  const buttonRef = useRef(null);
+  const [mobileMenuPosition, setMobileMenuPosition] =
+    useState(null);
 
   const children = categories.filter(
     (child) =>
@@ -31,6 +34,53 @@ function CategoryItem({
 
   const isOpen =
     openPath[level] === category.id;
+
+  useEffect(() => {
+    if (level !== 0 || !isOpen || !buttonRef.current) {
+      return undefined;
+    }
+
+    const updateMobileMenuPosition = () => {
+      const buttonBounds =
+        buttonRef.current.getBoundingClientRect();
+      const menuWidth = window.innerWidth < 640 ? 224 : 256;
+      const left = Math.max(
+        8,
+        Math.min(
+          buttonBounds.left,
+          window.innerWidth - menuWidth - 8
+        )
+      );
+
+      setMobileMenuPosition({
+        top: buttonBounds.bottom,
+        left,
+      });
+    };
+
+    updateMobileMenuPosition();
+    window.addEventListener(
+      "resize",
+      updateMobileMenuPosition
+    );
+    window.addEventListener(
+      "scroll",
+      updateMobileMenuPosition,
+      true
+    );
+
+    return () => {
+      window.removeEventListener(
+        "resize",
+        updateMobileMenuPosition
+      );
+      window.removeEventListener(
+        "scroll",
+        updateMobileMenuPosition,
+        true
+      );
+    };
+  }, [isOpen, level]);
 
   // ===================================================
   // OPEN MENU
@@ -78,6 +128,7 @@ function CategoryItem({
       ================================================= */}
 
       <button
+        ref={buttonRef}
         onClick={handleClick}
         className={`
           flex
@@ -169,12 +220,10 @@ function CategoryItem({
       {hasChildren && isOpen && (
         <div
           className={`
-            absolute
-
             ${
               level === 0
-                ? "top-[calc(100%-1px)] left-0"
-                : "top-0 left-full"
+                ? "fixed"
+                : "absolute top-0 left-full"
             }
 
             w-56
@@ -202,6 +251,14 @@ function CategoryItem({
 
             overflow-visible
           `}
+          style={
+            level === 0 && mobileMenuPosition
+              ? {
+                  top: `${mobileMenuPosition.top}px`,
+                  left: `${mobileMenuPosition.left}px`,
+                }
+              : undefined
+          }
         >
           {/* =================================================
               DROPDOWN HEADER
