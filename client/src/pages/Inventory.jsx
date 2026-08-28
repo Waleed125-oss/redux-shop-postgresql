@@ -467,7 +467,7 @@ const handleApplyFilters = () => {
                     z-10
                   "
                 >
-                  PKR
+                  USD
                 </span>
 
                 <input
@@ -544,7 +544,7 @@ const handleApplyFilters = () => {
                     z-10
                   "
                 >
-                  PKR
+                  USD
                 </span>
 
                 <input

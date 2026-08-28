@@ -36,13 +36,11 @@ function SellerDetails() {
         setLoading(true);
         setError("");
 
-        const data =
-          await fetchSellerDetailsAPI(id);
+        const data = await fetchSellerDetailsAPI(id);
 
         setSeller(data.seller);
         setStatistics(data.statistics);
         setProducts(data.products);
-
       } catch (error) {
         console.error(
           "Seller details error:",
@@ -82,7 +80,6 @@ function SellerDetails() {
   if (error) {
     return (
       <div className="p-8">
-
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <p className="text-red-600">
             {error}
@@ -97,7 +94,6 @@ function SellerDetails() {
         >
           ← Back to Sellers
         </button>
-
       </div>
     );
   }
@@ -109,7 +105,6 @@ function SellerDetails() {
   if (!seller) {
     return (
       <div className="p-8">
-
         <p className="text-gray-600">
           Seller not found.
         </p>
@@ -122,7 +117,6 @@ function SellerDetails() {
         >
           ← Back to Sellers
         </button>
-
       </div>
     );
   }
@@ -175,6 +169,8 @@ function SellerDetails() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+          {/* SELLER NAME */}
+
           <div>
             <p className="text-sm text-gray-500">
               Seller Name
@@ -185,6 +181,8 @@ function SellerDetails() {
             </p>
           </div>
 
+
+          {/* EMAIL */}
 
           <div>
             <p className="text-sm text-gray-500">
@@ -197,6 +195,8 @@ function SellerDetails() {
           </div>
 
 
+          {/* BUSINESS */}
+
           <div>
             <p className="text-sm text-gray-500">
               Business
@@ -207,6 +207,8 @@ function SellerDetails() {
             </p>
           </div>
 
+
+          {/* PHONE */}
 
           <div>
             <p className="text-sm text-gray-500">
@@ -219,6 +221,8 @@ function SellerDetails() {
           </div>
 
 
+          {/* STATUS */}
+
           <div>
             <p className="text-sm text-gray-500">
               Status
@@ -229,6 +233,37 @@ function SellerDetails() {
             </span>
           </div>
 
+
+          {/* ========================================
+              STRIPE CONNECT
+          ======================================== */}
+
+          <div>
+            <p className="text-sm text-gray-500">
+              Stripe Connect
+            </p>
+
+            {seller.stripe_account_id ? (
+              <div className="mt-1">
+
+                <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700">
+                  ✓ Connected
+                </span>
+
+                <p className="text-xs text-gray-500 mt-2 break-all">
+                  Account ID: {seller.stripe_account_id}
+                </p>
+
+              </div>
+            ) : (
+              <span className="inline-block mt-1 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                Not Connected
+              </span>
+            )}
+          </div>
+
+
+          {/* DESCRIPTION */}
 
           <div>
             <p className="text-sm text-gray-500">

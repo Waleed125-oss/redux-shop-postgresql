@@ -18,6 +18,7 @@ const adminCustomerRoutes = require("./routes/adminCustomerRoutes");
 const sellerRoutes = require("./routes/sellerRoutes")
 const paymentRoutes = require("./routes/paymentRoutes");
 const refundRoutes = require("./routes/refundRoutes");
+const stripeConnectRoutes = require("./routes/stripeConnectRoutes");
 
 const path = require("path");
 
@@ -53,6 +54,10 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/admin/customers", adminCustomerRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/refunds", refundRoutes);
+app.use("/api/stripe-connect",  stripeConnectRoutes);
+ 
+ 
+
 
 app.use(
   "/uploads",

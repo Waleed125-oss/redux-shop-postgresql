@@ -60,6 +60,8 @@ import SellerEditProduct from "./seller/pages/SellerEditProduct";
 import SellerRefundRequests from "./seller/pages/RefundRequests";
 import SellerList from "./admin/pages/SellerList";
 import SellerDetails from "./admin/pages/SellerDetails";
+import SellerStripeConnect from "./seller/pages/SellerStripeConnect";
+import SellerStripeOnboardingComplete from "./seller/pages/SellerStripeOnboardingComplete";
 
 
 function App() {
@@ -294,6 +296,16 @@ function App() {
     path="products"
     element={<SellerProducts />}
   />
+
+  <Route
+  path="stripe-connect"
+  element={<SellerStripeConnect />}
+/>
+
+<Route
+  path="stripe/onboarding/complete"
+  element={<SellerStripeOnboardingComplete />}
+/>
 
   <Route
   path="refunds"

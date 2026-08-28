@@ -1,5 +1,5 @@
 export const formatPrice = (value) =>
-  `PKR ${Number(value || 0).toLocaleString("en-PK", {
+  `USD ${Number(value || 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

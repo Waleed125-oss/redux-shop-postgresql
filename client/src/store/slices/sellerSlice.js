@@ -12,6 +12,7 @@ import {
   fetchSingleProductAPI,
   updateSellerProductAPI,
   updateSellerProductStatusAPI,
+  createStripeAccountLinkAPI,
 } from "../../services/api";
 
 // ========================================
@@ -50,6 +51,29 @@ export const fetchSellerProducts = createAsyncThunk(
   }
 );
 
+
+
+// ========================================
+// CREATE STRIPE ACCOUNT LINK
+// ========================================
+
+export const createStripeAccountLink =
+  createAsyncThunk(
+    "seller/createStripeAccountLink",
+    async (_, { rejectWithValue }) => {
+      try {
+        const result =
+          await createStripeAccountLinkAPI();
+
+        return result;
+      } catch (error) {
+        return rejectWithValue(
+          error.message ||
+            "Failed to create Stripe account link"
+        );
+      }
+    }
+  );
 // ========================================
 // CREATE SELLER PRODUCT
 // ========================================
@@ -233,6 +257,12 @@ const initialState = {
 
   error: null,
 
+  //---------------STRIPE--------------
+ 
+    stripeLoading: false,
+
+    stripeError: null,
+
   // ================= PRODUCTS =================
 
   products: [],
@@ -333,7 +363,34 @@ const sellerSlice = createSlice({
           state.error = action.payload;
         }
       )
+      
 
+      // ========================================
+// CREATE STRIPE ACCOUNT LINK
+// ========================================
+
+.addCase(
+  createStripeAccountLink.pending,
+  (state) => {
+    state.stripeLoading = true;
+    state.stripeError = null;
+  }
+)
+
+.addCase(
+  createStripeAccountLink.fulfilled,
+  (state) => {
+    state.stripeLoading = false;
+  }
+)
+
+.addCase(
+  createStripeAccountLink.rejected,
+  (state, action) => {
+    state.stripeLoading = false;
+    state.stripeError = action.payload;
+  }
+)
       // ========================================
       // GET SELLER PRODUCTS
       // ========================================

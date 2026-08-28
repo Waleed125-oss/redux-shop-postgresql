@@ -394,6 +394,7 @@ const getSellerDetails = async (req, res) => {
         u.name,
         u.email,
         u.role,
+        u.stripe_account_id,
         sa.business_name,
         sa.phone,
         sa.description,

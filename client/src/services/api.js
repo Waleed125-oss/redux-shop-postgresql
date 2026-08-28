@@ -1230,3 +1230,98 @@ export const approveSellerRefundAPI = async (refundId) => {
 
   return data;
 };
+
+
+// ================= STRIPE CONNECT =================
+
+// CREATE STRIPE ACCOUNT LINK
+export const createStripeAccountLinkAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/stripe/create-account-link`,
+    {
+      method: "POST",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to create Stripe onboarding link"
+    );
+  }
+
+  return data;
+};
+
+// ================= STRIPE CONNECT =================
+
+// CREATE STRIPE CONNECTED ACCOUNT
+export const createStripeConnectedAccountAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/stripe-connect/create-account`,
+    {
+      method: "POST",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        "Failed to create Stripe connected account"
+    );
+  }
+
+  return data;
+};
+
+
+// CREATE STRIPE ONBOARDING LINK
+export const createStripeOnboardingLinkAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/stripe-connect/onboarding`,
+    {
+      method: "POST",
+      headers: getJsonAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        "Failed to create Stripe onboarding link"
+    );
+  }
+
+  return data;
+};
+
+export const getStripeAccountStatusAPI = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${BASE_URL}/stripe-connect/status`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Failed to get Stripe account status"
+    );
+  }
+
+  return data;
+};
+
