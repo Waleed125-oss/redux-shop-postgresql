@@ -109,21 +109,25 @@ useEffect(() => {
   return (
     <header
       className="
-        h-20
         bg-white
         border-b
         border-gray-200
         flex
-        items-center
-        justify-between
-        px-8
+        flex-col
+        gap-3
+        px-4
+        py-3
         shadow-sm
+        sm:flex-row
+        sm:items-center
+        sm:justify-between
+        sm:px-8
       "
     >
 
       {/* ================= SEARCH ================= */}
 
-      <div className="relative w-96">
+      <div className="relative w-full sm:w-80 lg:w-96">
 
         <FaSearch
           className="
@@ -163,7 +167,7 @@ useEffect(() => {
 
       {/* ================= RIGHT SECTION ================= */}
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center justify-between gap-4 sm:justify-end sm:w-auto w-full">
 
 
         {/* ================= NOTIFICATIONS ================= */}

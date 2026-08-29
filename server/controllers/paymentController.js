@@ -761,7 +761,7 @@ const handleStripeWebhook = async (
         // =================================================
 
         if (
-          !item.seller_id
+          !item.seller_id //true
         ) {
 
           adminAmount +=

@@ -205,33 +205,61 @@ const handlePermanentDelete = async (product) => {
         </div>
 
 
-        <Link
-          to="/admin/products/add"
-          className="
-            inline-flex
-            items-center
-            justify-center
-            gap-2
-            bg-blue-600
-            hover:bg-blue-700
-            text-white
-            font-semibold
-            px-5
-            py-3
-            rounded-xl
-            shadow-sm
-            transition
-            duration-200
-            w-full
-            lg:w-auto
-          "
-        >
+       <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
 
-          <FaPlus size={14} />
+  {/* Generate with AI */}
+  <Link
+    to="/admin/products/ai"
+    className="
+      inline-flex
+      items-center
+      justify-center
+      gap-2
+      bg-purple-600
+      hover:bg-purple-700
+      text-white
+      font-semibold
+      px-5
+      py-3
+      rounded-xl
+      shadow-sm
+      transition
+      duration-200
+      w-full
+      sm:w-auto
+    "
+  >
+    ✨
+    Generate with AI
+  </Link>
 
-          Add Product
+  {/* Normal Add Product */}
+  <Link
+    to="/admin/products/add"
+    className="
+      inline-flex
+      items-center
+      justify-center
+      gap-2
+      bg-blue-600
+      hover:bg-blue-700
+      text-white
+      font-semibold
+      px-5
+      py-3
+      rounded-xl
+      shadow-sm
+      transition
+      duration-200
+      w-full
+      sm:w-auto
+    "
+  >
+    <FaPlus size={14} />
+    Add Product
+  </Link>
 
-        </Link>
+</div>
 
       </div>
 

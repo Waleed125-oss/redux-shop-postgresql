@@ -39,6 +39,7 @@ import Categories from "./admin/pages/Categories";
 import Customers from "./admin/pages/Customers";
 import CustomerDetails from "./admin/pages/CustomerDetails";
 import AdminRefundRequests from "./admin/pages/RefundRequests";
+import AdminAiProduct from "./admin/pages/AdminAiProduct";
 
 import MyOrderDetails from "./pages/MyOrderDetails";
 
@@ -62,6 +63,7 @@ import SellerList from "./admin/pages/SellerList";
 import SellerDetails from "./admin/pages/SellerDetails";
 import SellerStripeConnect from "./seller/pages/SellerStripeConnect";
 import SellerStripeOnboardingComplete from "./seller/pages/SellerStripeOnboardingComplete";
+import SellerAiProduct from "./seller/pages/SellerAIProduct";
 
 
 function App() {
@@ -204,6 +206,8 @@ function App() {
   element={<AdminRefundRequests />}
 />
 
+
+
           <Route
   path="sellers"
   element={<SellerList />}
@@ -243,6 +247,11 @@ function App() {
             path="products/add"
             element={<AddProduct />}
           />
+
+          <Route
+  path="products/ai"
+  element={<AdminAiProduct />}
+/>
 
           <Route
             path="products/edit/:id"
@@ -317,6 +326,12 @@ function App() {
     path="products/add"
     element={<SellerAddProduct />}
   />
+
+   {/* AI Add Product */}
+<Route
+  path="products/add-ai"
+  element={<SellerAiProduct />}
+/>
 
   <Route
   path="products/edit/:id"

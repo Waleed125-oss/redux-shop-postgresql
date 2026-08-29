@@ -86,23 +86,41 @@ function SellerProducts() {
 
         </div>
 
-        <button
+       <div className="flex gap-3">
 
-        onClick={() =>
-          navigate("/seller/products/add")
-        }
-          className="
-            px-5
-            py-2
-            bg-blue-600
-            text-white
-            rounded-lg
-            hover:bg-blue-700
-          "
-        >
-          Add Product
-        </button>
+  <button
+    onClick={() =>
+      navigate("/seller/products/add-ai")
+    }
+    className="
+      px-5
+      py-2
+      bg-purple-600
+      text-white
+      rounded-lg
+      hover:bg-purple-700
+    "
+  >
+    ✨ Add Product with AI
+  </button>
 
+  <button
+    onClick={() =>
+      navigate("/seller/products/add")
+    }
+    className="
+      px-5
+      py-2
+      bg-blue-600
+      text-white
+      rounded-lg
+      hover:bg-blue-700
+    "
+  >
+    Add Product
+  </button>
+
+</div>
       </div>
 
 

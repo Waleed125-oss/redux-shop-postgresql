@@ -7,17 +7,18 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-100">
 
-      <div className="flex">
+      <div className="flex flex-col sm:flex-row">
 
         {/* ================= SIDEBAR ================= */}
 
         <aside
           className="
-            w-64
+            w-full
             shrink-0
-            sticky
-            top-0
-            h-screen
+            sm:w-64
+            sm:sticky
+            sm:top-0
+            sm:h-screen
             overflow-y-auto
             bg-slate-900
           "
@@ -28,7 +29,7 @@ function AdminLayout() {
 
         {/* ================= MAIN AREA ================= */}
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
 
           {/* Topbar */}
 
