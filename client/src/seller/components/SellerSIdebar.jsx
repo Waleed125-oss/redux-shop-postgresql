@@ -149,6 +149,7 @@ import {
   FaCog,
   FaUndo,
   FaCreditCard,
+  FaFileInvoiceDollar,
 } from "react-icons/fa";
 
 function SellerSidebar() {
@@ -167,6 +168,11 @@ function SellerSidebar() {
       name: "Orders",
       path: "/seller/orders",
       icon: <FaClipboardList />,
+    },
+    {
+      name: "Invoices",
+      path: "/seller/invoices",
+      icon: <FaFileInvoiceDollar />,
     },
     {
       name: "Refund Requests",

@@ -11,6 +11,7 @@ import {
   FaCheckCircle,
   FaArrowLeft,
   FaUndo,
+  FaFileInvoiceDollar,
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
@@ -38,6 +39,11 @@ function Sidebar() {
       name: "Orders",
       icon: <FaClipboardList />,
       path: "/admin/orders",
+    },
+    {
+      name: "Invoices",
+      icon: <FaFileInvoiceDollar />,
+      path: "/admin/invoices",
     },
     {
       name: "Customers",

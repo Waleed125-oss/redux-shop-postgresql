@@ -24,6 +24,8 @@ import BecomeSeller from "./pages/BecomeSeller";
 import ShopBySeller from "./pages/ShopBySeller";
 import SellerStore from "./pages/SellerStore";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import MyInvoices from "./pages/MyInvoices";
+import MyInvoiceDetails from "./pages/MyInvoiceDetails";
 
 
 // Admin Pages
@@ -40,6 +42,8 @@ import Customers from "./admin/pages/Customers";
 import CustomerDetails from "./admin/pages/CustomerDetails";
 import AdminRefundRequests from "./admin/pages/RefundRequests";
 import AdminAiProduct from "./admin/pages/AdminAiProduct";
+import AdminInvoices from "./admin/pages/Invoices";
+import AdminInvoiceDetails from "./admin/pages/InvoiceDetails";
 
 import MyOrderDetails from "./pages/MyOrderDetails";
 
@@ -64,6 +68,8 @@ import SellerDetails from "./admin/pages/SellerDetails";
 import SellerStripeConnect from "./seller/pages/SellerStripeConnect";
 import SellerStripeOnboardingComplete from "./seller/pages/SellerStripeOnboardingComplete";
 import SellerAiProduct from "./seller/pages/SellerAIProduct";
+import SellerInvoices from "./seller/pages/SellerInvoices";
+import SellerInvoiceDetails from "./seller/pages/SellerInvoiceDetails";
 
 
 function App() {
@@ -190,6 +196,24 @@ function App() {
   }
 />
 
+        <Route
+          path="/my-invoices"
+          element={
+            <PrivateRoute>
+              <MyInvoices />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/my-invoices/:id"
+          element={
+            <PrivateRoute>
+              <MyInvoiceDetails />
+            </PrivateRoute>
+          }
+        />
+
         {/* ================= ADMIN ROUTES ================= */}
 
         <Route
@@ -264,8 +288,18 @@ function App() {
 />
 
           <Route
-            path="orders/:id"
-            element={<OrderDetails />}
+  path="orders/:id"
+  element={<OrderDetails />}
+  />
+
+          <Route
+            path="invoices"
+            element={<AdminInvoices />}
+          />
+
+          <Route
+            path="invoices/:id"
+            element={<AdminInvoiceDetails />}
           />
 
           <Route
@@ -346,8 +380,18 @@ function App() {
 
   {/* Seller Order Details */}
   <Route
-    path="orders/:id"
-    element={<SellerOrderDetails />}
+  path="orders/:id"
+  element={<SellerOrderDetails />}
+  />
+
+  <Route
+    path="invoices"
+    element={<SellerInvoices />}
+  />
+
+  <Route
+    path="invoices/:id"
+    element={<SellerInvoiceDetails />}
   />
 
 

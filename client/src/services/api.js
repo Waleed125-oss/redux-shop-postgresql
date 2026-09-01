@@ -409,6 +409,126 @@ export const fetchSingleOrderAPI = async (
   return response.json();
 };
 
+// ================= CUSTOMER INVOICES =================
+
+export const fetchMyInvoicesAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/invoices/my`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to fetch invoices"
+    );
+  }
+
+  return data;
+};
+
+export const fetchMyInvoiceAPI = async (id) => {
+  const response = await fetch(
+    `${BASE_URL}/invoices/my/${id}`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to fetch invoice"
+    );
+  }
+
+  return data;
+};
+
+// ================= SELLER INVOICES =================
+
+export const fetchSellerInvoicesAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/invoices/seller`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to fetch seller invoices"
+    );
+  }
+
+  return data;
+};
+
+export const fetchSellerInvoiceAPI = async (id) => {
+  const response = await fetch(
+    `${BASE_URL}/invoices/seller/${id}`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to fetch seller invoice"
+    );
+  }
+
+  return data;
+};
+
+// ================= ADMIN INVOICES =================
+
+export const fetchAdminInvoicesAPI = async () => {
+  const response = await fetch(
+    `${BASE_URL}/invoices/admin`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to fetch invoices"
+    );
+  }
+
+  return data;
+};
+
+export const fetchAdminInvoiceAPI = async (id) => {
+  const response = await fetch(
+    `${BASE_URL}/invoices/admin/${id}`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to fetch invoice"
+    );
+  }
+
+  return data;
+};
+
 
 export const updateOrderStatusAPI = async (
   id,

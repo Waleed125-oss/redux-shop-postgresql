@@ -1,6 +1,125 @@
 const stripe = require("../config/stripe");
 const pool = require("../config/db");
 
+const getStripeStateSnapshot = async (stripeAccountId) => {
+  if (!stripeAccountId) {
+    return {
+      status: "not_connected",
+      connected: false,
+      onboardingCompleted: false,
+      stripeAccountId: null,
+      detailsSubmitted: false,
+      chargesEnabled: false,
+      payoutsEnabled: false,
+      currentlyDue: [],
+      eventuallyDue: [],
+      pastDue: [],
+    };
+  }
+
+  try {
+    const account = await stripe.accounts.retrieve(stripeAccountId);
+
+    const currentlyDue = account.requirements?.currently_due || [];
+    const eventuallyDue = account.requirements?.eventually_due || [];
+    const pastDue = account.requirements?.past_due || [];
+    const chargesEnabled = Boolean(account.charges_enabled);
+    const payoutsEnabled = Boolean(account.payouts_enabled);
+    const detailsSubmitted = Boolean(account.details_submitted);
+
+    const connected =
+      chargesEnabled && payoutsEnabled && detailsSubmitted;
+
+    const onboardingCompleted =
+      connected && currentlyDue.length === 0 && pastDue.length === 0;
+
+    let status = "not_connected";
+
+    if (onboardingCompleted) {
+      status = "connected";
+    } else if (pastDue.length > 0 || currentlyDue.length > 0) {
+      status = "action_required";
+    } else if (detailsSubmitted || chargesEnabled || payoutsEnabled) {
+      status = "pending";
+    }
+
+    return {
+      status,
+      connected,
+      onboardingCompleted,
+      stripeAccountId: account.id,
+      detailsSubmitted,
+      chargesEnabled,
+      payoutsEnabled,
+      currentlyDue,
+      eventuallyDue,
+      pastDue,
+    };
+  } catch (error) {
+    console.warn(
+      "Stripe account snapshot unavailable:",
+      error.message
+    );
+
+    return {
+      status: "not_connected",
+      connected: false,
+      onboardingCompleted: false,
+      stripeAccountId: stripeAccountId,
+      detailsSubmitted: false,
+      chargesEnabled: false,
+      payoutsEnabled: false,
+      currentlyDue: [],
+      eventuallyDue: [],
+      pastDue: [],
+    };
+  }
+};
+
+const syncSellerStripeStatus = async (userId, stripeAccountId) => {
+  const accountId = stripeAccountId || null;
+  const snapshot = await getStripeStateSnapshot(accountId);
+
+  const columnsResult = await pool.query(
+    `
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_name = 'users'
+      AND column_name IN ('stripe_account_status', 'stripe_onboarding_complete')
+    `
+  );
+
+  const availableColumns = new Set(
+    columnsResult.rows.map((row) => row.column_name)
+  );
+
+  const updates = [];
+  const values = [];
+
+  if (availableColumns.has("stripe_account_status")) {
+    updates.push(`stripe_account_status = $${updates.length + 1}`);
+    values.push(snapshot.status);
+  }
+
+  if (availableColumns.has("stripe_onboarding_complete")) {
+    updates.push(`stripe_onboarding_complete = $${updates.length + 1}`);
+    values.push(snapshot.onboardingCompleted);
+  }
+
+  if (updates.length > 0) {
+    await pool.query(
+      `
+      UPDATE users
+      SET ${updates.join(", ")}
+      WHERE id = $${updates.length + 1}
+      `,
+      [...values, userId]
+    );
+  }
+
+  return snapshot;
+};
+
 // ======================================================
 // CREATE STRIPE CONNECTED ACCOUNT
 // ======================================================
@@ -81,6 +200,8 @@ const createConnectedAccount = async (req, res) => {
       [account.id, userId]
     );
 
+    const statusSnapshot = await syncSellerStripeStatus(userId, account.id);
+
     // ==================================================
     // STEP 6: RESPONSE
     // ==================================================
@@ -88,6 +209,8 @@ const createConnectedAccount = async (req, res) => {
     res.status(201).json({
       message: "Stripe connected account created successfully",
       stripeAccountId: account.id,
+      status: statusSnapshot.status,
+      onboardingCompleted: statusSnapshot.onboardingCompleted,
     });
 
   } catch (error) {
@@ -228,54 +351,22 @@ const getStripeAccountStatus = async (req, res) => {
       });
     }
 
-    // Retrieve account from Stripe
-    const account = await stripe.accounts.retrieve(
+    const snapshot = await syncSellerStripeStatus(
+      userId,
       seller.stripe_account_id
     );
 
-    const currentlyDue =
-      account.requirements?.currently_due || [];
-
-    const eventuallyDue =
-      account.requirements?.eventually_due || [];
-
-    const pastDue =
-      account.requirements?.past_due || [];
-
-    const chargesEnabled =
-      account.charges_enabled;
-
-    const payoutsEnabled =
-      account.payouts_enabled;
-
-    const detailsSubmitted =
-      account.details_submitted;
-
-    // Determine overall status
-    let status = "incomplete";
-
-    if (
-      chargesEnabled &&
-      payoutsEnabled &&
-      detailsSubmitted &&
-      currentlyDue.length === 0
-    ) {
-      status = "complete";
-    } else if (pastDue.length > 0) {
-      status = "action_required";
-    } else {
-      status = "pending";
-    }
-
     return res.json({
-      status,
-      stripeAccountId: account.id,
-      detailsSubmitted,
-      chargesEnabled,
-      payoutsEnabled,
-      currentlyDue,
-      eventuallyDue,
-      pastDue,
+      status: snapshot.status === "connected" ? "complete" : snapshot.status,
+      connected: snapshot.connected,
+      onboardingCompleted: snapshot.onboardingCompleted,
+      stripeAccountId: snapshot.stripeAccountId,
+      detailsSubmitted: snapshot.detailsSubmitted,
+      chargesEnabled: snapshot.chargesEnabled,
+      payoutsEnabled: snapshot.payoutsEnabled,
+      currentlyDue: snapshot.currentlyDue,
+      eventuallyDue: snapshot.eventuallyDue,
+      pastDue: snapshot.pastDue,
     });
 
   } catch (error) {

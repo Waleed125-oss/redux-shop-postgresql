@@ -1,12 +1,1782 @@
+// const stripe = require("../config/stripe");
+// const pool = require("../config/db");
+// const {
+//   createInvoiceForPaidOrder,
+// } = require("../services/invoiceService");
+
+// // ======================================================
+// // PLATFORM COMMISSION
+// // ======================================================
+
+// const COMMISSION_PERCENTAGE = 10;
+
+
+// // ======================================================
+// // CREATE STRIPE CHECKOUT SESSION
+// // ======================================================
+
+// const createCheckoutSession = async (req, res) => {
+//   const client = await pool.connect();
+
+//   try {
+//     // ==================================================
+//     // START DATABASE TRANSACTION
+//     // ==================================================
+
+//     await client.query("BEGIN");
+
+
+//     // ==================================================
+//     // GET USER CART
+//     // ==================================================
+
+//     const cart = await client.query(
+//       `
+//       SELECT
+//         cart.product_id,
+//         cart.quantity,
+//         products.title,
+//         products.price,
+//         products.image,
+//         products.seller_id
+//       FROM cart
+//       JOIN products
+//         ON cart.product_id = products.id
+//       WHERE cart.user_id = $1
+//       `,
+//       [req.user.id]
+//     );
+
+
+//     // ==================================================
+//     // CART EMPTY
+//     // ==================================================
+
+//     if (cart.rows.length === 0) {
+//       await client.query("ROLLBACK");
+
+//       return res.status(400).json({
+//         message: "Cart is empty",
+//       });
+//     }
+
+
+//     // ==================================================
+//     // CALCULATE TOTAL
+//     // ==================================================
+
+//     const totalAmount = cart.rows.reduce(
+//       (total, item) => {
+//         return (
+//           total +
+//           Number(item.price) *
+//             Number(item.quantity)
+//         );
+//       },
+//       0
+//     );
+
+
+//     // ==================================================
+//     // CREATE PENDING ORDER
+//     // ==================================================
+
+//     const order = await client.query(
+//       `
+//       INSERT INTO orders
+//       (
+//         user_id,
+//         total_amount,
+//         status,
+//         payment_status,
+//         commission_amount,
+//         platform_amount,
+//         seller_amount,
+//         transfer_status
+//       )
+//       VALUES
+//       ($1, $2, $3, $4, $5, $6, $7, $8)
+//       RETURNING *
+//       `,
+//       [
+//         req.user.id,
+//         totalAmount,
+//         "Pending",
+//         "pending",
+//         0,
+//         0,
+//         0,
+//         "pending",
+//       ]
+//     );
+
+
+//     const orderId =
+//       order.rows[0].id;
+
+
+//     // ==================================================
+//     // CREATE ORDER ITEMS
+//     // ==================================================
+
+//     for (const item of cart.rows) {
+//       await client.query(
+//         `
+//         INSERT INTO order_items
+//         (
+//           order_id,
+//           product_id,
+//           quantity,
+//           price
+//         )
+//         VALUES
+//         ($1, $2, $3, $4)
+//         `,
+//         [
+//           orderId,
+//           item.product_id,
+//           item.quantity,
+//           item.price,
+//         ]
+//       );
+//     }
+
+
+//     // ==================================================
+//     // CREATE STRIPE LINE ITEMS
+//     // ==================================================
+
+//     const lineItems = cart.rows.map((item) => ({
+//       price_data: {
+//         currency: "usd",
+
+//         product_data: {
+//           name: item.title,
+
+//           metadata: {
+//             productId: String(
+//               item.product_id
+//             ),
+
+//             // NULL means admin-owned product
+//             sellerId: item.seller_id
+//               ? String(item.seller_id)
+//               : "admin",
+//           },
+//         },
+
+//         unit_amount: Math.round(
+//           Number(item.price) * 100
+//         ),
+//       },
+
+//       quantity: item.quantity,
+//     }));
+
+
+//     // ==================================================
+//     // CREATE STRIPE CHECKOUT SESSION
+//     // ==================================================
+
+//     const session =
+//       await stripe.checkout.sessions.create({
+//         mode: "payment",
+
+//         line_items: lineItems,
+
+//         success_url:
+//           `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+
+//         cancel_url:
+//           `${process.env.CLIENT_URL}/cart`,
+
+//         metadata: {
+//           userId: String(req.user.id),
+//           orderId: String(orderId),
+//         },
+//       });
+
+
+//     // ==================================================
+//     // SAVE STRIPE SESSION ID
+//     // ==================================================
+
+//     await client.query(
+//       `
+//       UPDATE orders
+//       SET stripe_session_id = $1
+//       WHERE id = $2
+//       `,
+//       [
+//         session.id,
+//         orderId,
+//       ]
+//     );
+
+
+//     // ==================================================
+//     // COMMIT
+//     // ==================================================
+
+//     await client.query("COMMIT");
+
+
+//     // ==================================================
+//     // SEND CHECKOUT URL
+//     // ==================================================
+
+//     return res.json({
+//       url: session.url,
+//     });
+
+//   } catch (error) {
+
+//     // ==================================================
+//     // ROLLBACK
+//     // ==================================================
+
+//     await client.query("ROLLBACK");
+
+//     console.error(
+//       "Stripe Checkout Error:",
+//       error
+//     );
+
+//     return res.status(500).json({
+//       message:
+//         "Failed to create Stripe checkout session",
+//     });
+
+//   } finally {
+
+//     client.release();
+//   }
+// };
+
+
+
+// // ======================================================
+// // VERIFY CHECKOUT SESSION
+// // ======================================================
+
+// const verifyCheckoutSession = async (
+//   req,
+//   res
+// ) => {
+
+//   try {
+
+//     const { sessionId } =
+//       req.params;
+
+
+//     // ==================================================
+//     // GET STRIPE SESSION
+//     // ==================================================
+
+//     const session =
+//       await stripe.checkout.sessions.retrieve(
+//         sessionId
+//       );
+
+
+//     // ==================================================
+//     // CHECK SESSION USER
+//     // ==================================================
+
+//     if (
+//       session.metadata?.userId !==
+//       String(req.user.id)
+//     ) {
+
+//       return res.status(403).json({
+//         message:
+//           "Unauthorized payment session",
+//       });
+//     }
+
+
+//     // ==================================================
+//     // CHECK PAYMENT STATUS
+//     // ==================================================
+
+//     if (
+//       session.payment_status !==
+//       "paid"
+//     ) {
+
+//       return res.status(400).json({
+//         message:
+//           "Payment has not been completed",
+//       });
+//     }
+
+
+//     // ==================================================
+//     // GET ORDER ID
+//     // ==================================================
+
+//     const orderId =
+//       session.metadata?.orderId;
+
+
+//     if (!orderId) {
+
+//       return res.status(400).json({
+//         message:
+//           "Order ID not found in payment session",
+//       });
+//     }
+
+
+//     // ==================================================
+//     // UPDATE ORDER
+//     // ==================================================
+
+//     const result =
+//       await pool.query(
+//         `
+//         UPDATE orders
+//         SET
+//           payment_status = 'paid',
+//           status = 'Processing'
+//         WHERE id = $1
+//         RETURNING *
+//         `,
+//         [orderId]
+//       );
+
+
+//     // ==================================================
+//     // ORDER NOT FOUND
+//     // ==================================================
+
+//     if (
+//       result.rows.length === 0
+//     ) {
+
+//       return res.status(404).json({
+//         message:
+//           "Order not found",
+//       });
+//     }
+
+//     const invoiceResult =
+//       await createInvoiceForPaidOrder(orderId);
+
+
+//     // ==================================================
+//     // CLEAR CUSTOMER CART
+//     // ==================================================
+
+//     await pool.query(
+//       `
+//       DELETE FROM cart
+//       WHERE user_id = $1
+//       `,
+//       [req.user.id]
+//     );
+
+
+//     // ==================================================
+//     // SUCCESS
+//     // ==================================================
+
+//     return res.json({
+
+//       message:
+//         "Payment verified successfully",
+
+//       order:
+//         result.rows[0],
+
+//       invoice:
+//         invoiceResult.invoice,
+//     });
+
+
+//   } catch (error) {
+
+//     console.error(
+//       "Stripe Verification Error:",
+//       error
+//     );
+
+//     return res.status(500).json({
+//       message:
+//         "Failed to verify payment",
+//     });
+//   }
+// };
+
+
+
+// // ======================================================
+// // HANDLE STRIPE WEBHOOK
+// // ======================================================
+
+// const handleStripeWebhook = async (
+//   req,
+//   res
+// ) => {
+
+//   const signature =
+//     req.headers["stripe-signature"];
+
+
+//   let event;
+
+
+//   // ======================================================
+//   // VERIFY STRIPE WEBHOOK
+//   // ======================================================
+
+//   try {
+
+//     event =
+//       stripe.webhooks.constructEvent(
+//         req.body,
+//         signature,
+//         process.env.STRIPE_WEBHOOK_SECRET
+//       );
+
+//   } catch (error) {
+
+//     console.error(
+//       "❌ Webhook signature verification failed:",
+//       error.message
+//     );
+
+//     return res.status(400).send(
+//       `Webhook Error: ${error.message}`
+//     );
+//   }
+
+
+//   // ======================================================
+//   // ONLY PROCESS RELEVANT EVENTS
+//   // ======================================================
+
+//   if (
+//     event.type !==
+//       "checkout.session.completed" &&
+
+//     event.type !==
+//       "checkout.session.async_payment_failed" &&
+
+//     event.type !==
+//       "checkout.session.expired"
+//   ) {
+
+//     return res.json({
+//       received: true,
+//     });
+//   }
+
+
+//   let orderId;
+
+
+//   try {
+
+//     // ====================================================
+//     // PAYMENT COMPLETED
+//     // ====================================================
+
+//     if (
+//       event.type ===
+//       "checkout.session.completed"
+//     ) {
+
+//       const session =
+//         event.data.object;
+
+
+//       orderId =
+//         session.metadata?.orderId;
+
+
+//       const userId =
+//         session.metadata?.userId;
+
+
+//       console.log(
+//         "======================================"
+//       );
+
+//       console.log(
+//         "🔥 STRIPE CHECKOUT COMPLETED"
+//       );
+
+//       console.log(
+//         "Session:",
+//         session.id
+//       );
+
+//       console.log(
+//         "Order:",
+//         orderId
+//       );
+
+//       console.log(
+//         "User:",
+//         userId
+//       );
+
+//       console.log(
+//         "Payment status:",
+//         session.payment_status
+//       );
+
+//       console.log(
+//         "======================================"
+//       );
+
+
+//       // ==================================================
+//       // CHECK METADATA
+//       // ==================================================
+
+//       if (
+//         !orderId ||
+//         !userId
+//       ) {
+
+//         console.log(
+//           "❌ Missing orderId or userId"
+//         );
+
+//         return res.json({
+//           received: true,
+//         });
+//       }
+
+
+//       // ==================================================
+//       // CHECK PAYMENT STATUS
+//       // ==================================================
+
+//       if (
+//         session.payment_status !==
+//         "paid"
+//       ) {
+
+//         console.log(
+//           `⚠️ Order ${orderId} is not paid`
+//         );
+
+//         return res.json({
+//           received: true,
+//         });
+//       }
+
+
+//       // ==================================================
+//       // 1. GET ORDER
+//       // ==================================================
+
+//       const orderResult =
+//         await pool.query(
+//           `
+//           SELECT
+//             id,
+//             user_id,
+//             total_amount,
+//             payment_status,
+//             stripe_transfer_id,
+//             transfer_status,
+//             commission_amount,
+//             platform_amount,
+//             seller_amount
+//           FROM orders
+//           WHERE id = $1
+//           FOR UPDATE
+//           `,
+//           [orderId]
+//         );
+
+
+//       // ==================================================
+//       // ORDER NOT FOUND
+//       // ==================================================
+
+//       if (
+//         orderResult.rows.length === 0
+//       ) {
+
+//         console.log(
+//           `❌ Order ${orderId} not found`
+//         );
+
+//         return res.json({
+//           received: true,
+//         });
+//       }
+
+
+//       const order =
+//         orderResult.rows[0];
+
+
+//       // ==================================================
+//       // 2. MARK PAYMENT AS PAID
+//       // ==================================================
+
+//       await pool.query(
+//         `
+//         UPDATE orders
+//         SET
+//           payment_status = 'paid',
+//           status = 'Processing'
+//         WHERE id = $1
+//         `,
+//         [orderId]
+//       );
+
+//       await createInvoiceForPaidOrder(orderId);
+
+
+//       console.log(
+//         `✅ Order ${orderId} marked as paid`
+//       );
+
+
+//       // ==================================================
+//       // 3. CHECK WHETHER SELLER TRANSFERS
+//       //    ALREADY EXIST
+//       // ==================================================
+
+//       const existingTransfers =
+//         await pool.query(
+//           `
+//           SELECT
+//             id,
+//             seller_id,
+//             stripe_transfer_id,
+//             transfer_status
+//           FROM order_transfers
+//           WHERE order_id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//       // ==================================================
+//       // IF TRANSFERS ALREADY EXIST
+//       // DON'T CREATE DUPLICATES
+//       // ==================================================
+
+//       if (
+//         existingTransfers.rows.some(
+//           (transfer) =>
+//             transfer.stripe_transfer_id
+//         )
+//       ) {
+
+//         console.log(
+//           `⚠️ Order ${orderId} already has seller transfers`
+//         );
+
+//         return res.json({
+//           received: true,
+//         });
+//       }
+
+
+//       // ==================================================
+//       // 4. GET ORDER ITEMS
+//       //
+//       // IMPORTANT:
+//       //
+//       // LEFT JOIN users is required because
+//       // admin products have seller_id = NULL.
+//       // ==================================================
+
+//       const itemsResult =
+//         await pool.query(
+//           `
+//           SELECT
+//             oi.product_id,
+//             oi.quantity,
+//             oi.price,
+
+//             p.seller_id,
+
+//             u.stripe_account_id
+
+//           FROM order_items oi
+
+//           JOIN products p
+//             ON oi.product_id = p.id
+
+//           LEFT JOIN users u
+//             ON p.seller_id = u.id
+
+//           WHERE oi.order_id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//       // ==================================================
+//       // NO ITEMS
+//       // ==================================================
+
+//       if (
+//         itemsResult.rows.length === 0
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'failed'
+//           WHERE id = $1
+//           `,
+//           [orderId]
+//         );
+
+//         console.log(
+//           `❌ No order items found for order ${orderId}`
+//         );
+
+//         return res.json({
+//           received: true,
+//         });
+//       }
+
+
+//       // ==================================================
+//       // 5. CALCULATE ADMIN + SELLER AMOUNTS
+//       // ==================================================
+
+//       let adminAmount = 0;
+
+
+//       const sellerAmounts = {};
+
+
+//       for (
+//         const item
+//         of itemsResult.rows
+//       ) {
+
+//         const amount =
+//           Number(item.price) *
+//           Number(item.quantity);
+
+
+//         // =================================================
+//         // ADMIN PRODUCT
+//         //
+//         // seller_id = NULL
+//         // =================================================
+
+//         if (
+//           !item.seller_id //true
+//         ) {
+
+//           adminAmount +=
+//             amount;
+
+
+//           console.log(
+//             `🏦 Admin product ${item.product_id}: $${amount.toFixed(2)}`
+//           );
+
+
+//           continue;
+//         }
+
+
+//         // =================================================
+//         // SELLER PRODUCT
+//         // =================================================
+
+//         const sellerId =
+//           String(item.seller_id);
+
+
+//         if (
+//           !sellerAmounts[sellerId]
+//         ) {
+
+//           sellerAmounts[sellerId] = {
+
+//             grossAmount: 0,
+
+//             stripeAccountId:
+//               item.stripe_account_id,
+
+//             commissionAmount: 0,
+
+//             sellerAmount: 0,
+//           };
+//         }
+
+
+//         sellerAmounts[
+//           sellerId
+//         ].grossAmount +=
+//           amount;
+//       }
+
+
+//       // ==================================================
+//       // 6. CALCULATE COMMISSION FOR EVERY SELLER
+//       // ==================================================
+
+//       let totalCommission = 0;
+
+//       let totalSellerPayout = 0;
+
+
+//       for (
+//         const sellerId
+//         of Object.keys(
+//           sellerAmounts
+//         )
+//       ) {
+
+//         const seller =
+//           sellerAmounts[
+//             sellerId
+//           ];
+
+
+//         const grossAmount =
+//           Number(
+//             seller.grossAmount
+//           );
+
+
+//         // =================================================
+//         // COMMISSION
+//         // =================================================
+
+//         const commissionAmount =
+//           Number(
+//             (
+//               grossAmount *
+//               (
+//                 COMMISSION_PERCENTAGE /
+//                 100
+//               )
+//             ).toFixed(2)
+//           );
+
+
+//         // =================================================
+//         // SELLER PAYOUT
+//         // =================================================
+
+//         const sellerAmount =
+//           Number(
+//             (
+//               grossAmount -
+//               commissionAmount
+//             ).toFixed(2)
+//           );
+
+
+//         seller.commissionAmount =
+//           commissionAmount;
+
+
+//         seller.sellerAmount =
+//           sellerAmount;
+
+
+//         totalCommission +=
+//           commissionAmount;
+
+
+//         totalSellerPayout +=
+//           sellerAmount;
+
+
+//         console.log(
+//           "--------------------------------------"
+//         );
+
+//         console.log(
+//           `👤 Seller ${sellerId}`
+//         );
+
+//         console.log(
+//           `Gross amount: $${grossAmount.toFixed(2)}`
+//         );
+
+//         console.log(
+//           `Commission: $${commissionAmount.toFixed(2)}`
+//         );
+
+//         console.log(
+//           `Seller payout: $${sellerAmount.toFixed(2)}`
+//         );
+
+//         console.log(
+//           "--------------------------------------"
+//         );
+//       }
+
+
+//       // ==================================================
+//       // 7. PLATFORM AMOUNT
+//       //
+//       // Admin products remain on platform.
+//       //
+//       // Platform also keeps seller commissions.
+//       // ==================================================
+
+//       const platformAmount =
+//         Number(
+//           (
+//             adminAmount +
+//             totalCommission
+//           ).toFixed(2)
+//         );
+
+
+//       // ==================================================
+//       // PAYMENT BREAKDOWN
+//       // ==================================================
+
+//       console.log(
+//         "======================================"
+//       );
+
+//       console.log(
+//         "💰 FINAL PAYMENT BREAKDOWN"
+//       );
+
+//       console.log(
+//         `Order total: $${Number(
+//           order.total_amount
+//         ).toFixed(2)}`
+//       );
+
+//       console.log(
+//         `Admin products: $${adminAmount.toFixed(2)}`
+//       );
+
+//       console.log(
+//         `Total commission: $${totalCommission.toFixed(2)}`
+//       );
+
+//       console.log(
+//         `Platform amount: $${platformAmount.toFixed(2)}`
+//       );
+
+//       console.log(
+//         `Seller payouts: $${totalSellerPayout.toFixed(2)}`
+//       );
+
+//       console.log(
+//         "======================================"
+//       );
+
+
+//       // ==================================================
+//       // 8. SAVE ORDER FINANCIAL SUMMARY
+//       // ==================================================
+
+//       await pool.query(
+//         `
+//         UPDATE orders
+//         SET
+//           commission_amount = $1,
+//           platform_amount = $2,
+//           seller_amount = $3
+//         WHERE id = $4
+//         `,
+//         [
+//           totalCommission.toFixed(2),
+//           platformAmount.toFixed(2),
+//           totalSellerPayout.toFixed(2),
+//           orderId,
+//         ]
+//       );
+
+
+//       // ==================================================
+//       // 9. CREATE TRANSFER RECORDS + STRIPE TRANSFERS
+//       // ==================================================
+
+//       for (
+//         const sellerId
+//         of Object.keys(
+//           sellerAmounts
+//         )
+//       ) {
+
+//         const seller =
+//           sellerAmounts[
+//             sellerId
+//           ];
+
+
+//         const grossAmount =
+//           Number(
+//             seller.grossAmount
+//           );
+
+
+//         const commissionAmount =
+//           Number(
+//             seller.commissionAmount
+//           );
+
+
+//         const sellerAmount =
+//           Number(
+//             seller.sellerAmount
+//           );
+
+
+//         // =================================================
+//         // SELLER HAS NO CONNECTED ACCOUNT
+//         // =================================================
+
+//         if (
+//           !seller.stripeAccountId
+//         ) {
+
+//           console.log(
+//             `⚠️ Seller ${sellerId} has no Stripe connected account`
+//           );
+
+
+//           await pool.query(
+//             `
+//             INSERT INTO order_transfers
+//             (
+//               order_id,
+//               seller_id,
+//               stripe_account_id,
+//               gross_amount,
+//               commission_amount,
+//               seller_amount,
+//               transfer_status
+//             )
+//             VALUES
+//             ($1, $2, $3, $4, $5, $6, $7)
+
+//             ON CONFLICT (order_id, seller_id)
+//             DO UPDATE SET
+
+//               transfer_status =
+//                 EXCLUDED.transfer_status,
+
+//               updated_at =
+//                 CURRENT_TIMESTAMP
+//             `,
+//             [
+//               orderId,
+//               sellerId,
+//               "not_connected",
+//               grossAmount,
+//               commissionAmount,
+//               sellerAmount,
+//               "seller_not_connected",
+//             ]
+//           );
+
+
+//           continue;
+//         }
+
+
+//         // =================================================
+//         // CONVERT TO STRIPE CENTS
+//         // =================================================
+
+//         const transferAmount =
+//           Math.round(
+//             sellerAmount * 100
+//           );
+
+
+//         // =================================================
+//         // INVALID AMOUNT
+//         // =================================================
+
+//         if (
+//           transferAmount <= 0
+//         ) {
+
+//           await pool.query(
+//             `
+//             INSERT INTO order_transfers
+//             (
+//               order_id,
+//               seller_id,
+//               stripe_account_id,
+//               gross_amount,
+//               commission_amount,
+//               seller_amount,
+//               transfer_status
+//             )
+//             VALUES
+//             ($1,$2,$3,$4,$5,$6,$7)
+
+//             ON CONFLICT (order_id, seller_id)
+//             DO UPDATE SET
+
+//               transfer_status =
+//                 EXCLUDED.transfer_status,
+
+//               updated_at =
+//                 CURRENT_TIMESTAMP
+//             `,
+//             [
+//               orderId,
+//               sellerId,
+//               seller.stripeAccountId,
+//               grossAmount,
+//               commissionAmount,
+//               sellerAmount,
+//               "invalid_amount",
+//             ]
+//           );
+
+
+//           continue;
+//         }
+
+
+//         // =================================================
+//         // CHECK EXISTING SELLER TRANSFER RECORD
+//         // =================================================
+
+//         const transferRecord =
+//           await pool.query(
+//             `
+//             SELECT
+//               id,
+//               stripe_transfer_id,
+//               transfer_status
+//             FROM order_transfers
+//             WHERE order_id = $1
+//             AND seller_id = $2
+//             `,
+//             [
+//               orderId,
+//               sellerId,
+//             ]
+//           );
+
+
+//         // =================================================
+//         // TRANSFER ALREADY CREATED
+//         // =================================================
+
+//         if (
+//           transferRecord.rows.length > 0 &&
+//           transferRecord.rows[0]
+//             .stripe_transfer_id
+//         ) {
+
+//           console.log(
+//             `⚠️ Transfer already exists for seller ${sellerId}`
+//           );
+
+//           continue;
+//         }
+
+
+//         // =================================================
+//         // CREATE / UPDATE TRANSFER RECORD
+//         // =================================================
+
+//         await pool.query(
+//           `
+//           INSERT INTO order_transfers
+//           (
+//             order_id,
+//             seller_id,
+//             stripe_account_id,
+//             gross_amount,
+//             commission_amount,
+//             seller_amount,
+//             transfer_status
+//           )
+//           VALUES
+//           ($1,$2,$3,$4,$5,$6,$7)
+
+//           ON CONFLICT (order_id, seller_id)
+//           DO UPDATE SET
+
+//             stripe_account_id =
+//               EXCLUDED.stripe_account_id,
+
+//             gross_amount =
+//               EXCLUDED.gross_amount,
+
+//             commission_amount =
+//               EXCLUDED.commission_amount,
+
+//             seller_amount =
+//               EXCLUDED.seller_amount,
+
+//             transfer_status =
+//               'pending',
+
+//             updated_at =
+//               CURRENT_TIMESTAMP
+//           `,
+//           [
+//             orderId,
+//             sellerId,
+//             seller.stripeAccountId,
+//             grossAmount,
+//             commissionAmount,
+//             sellerAmount,
+//             "pending",
+//           ]
+//         );
+
+
+//         // =================================================
+//         // CREATE STRIPE TRANSFER
+//         // =================================================
+
+//         try {
+
+//           console.log(
+//             "======================================"
+//           );
+
+//           console.log(
+//             `🚀 CREATING TRANSFER`
+//           );
+
+//           console.log(
+//             `Order: ${orderId}`
+//           );
+
+//           console.log(
+//             `Seller: ${sellerId}`
+//           );
+
+//           console.log(
+//             `Stripe account: ${seller.stripeAccountId}`
+//           );
+
+//           console.log(
+//             `Gross: $${grossAmount.toFixed(2)}`
+//           );
+
+//           console.log(
+//             `Commission: $${commissionAmount.toFixed(2)}`
+//           );
+
+//           console.log(
+//             `Seller payout: $${sellerAmount.toFixed(2)}`
+//           );
+
+//           console.log(
+//             "======================================"
+//           );
+
+
+//           // =================================================
+//           // STRIPE TRANSFER
+//           // =================================================
+
+//           const transfer =
+//             await stripe.transfers.create(
+
+//               {
+//                 amount:
+//                   transferAmount,
+
+//                 currency:
+//                   "usd",
+
+//                 destination:
+//                   seller.stripeAccountId,
+
+//                 metadata: {
+
+//                   orderId:
+//                     String(orderId),
+
+//                   sellerId:
+//                     String(sellerId),
+
+//                   grossAmount:
+//                     grossAmount.toFixed(2),
+
+//                   commissionAmount:
+//                     commissionAmount.toFixed(2),
+
+//                   sellerAmount:
+//                     sellerAmount.toFixed(2),
+//                 },
+//               },
+
+//               {
+//                 // =================================================
+//                 // IMPORTANT
+//                 //
+//                 // Stripe will not create another transfer if the
+//                 // same webhook is processed again.
+//                 // =================================================
+
+//                 idempotencyKey:
+//                   `order-${orderId}-seller-${sellerId}`,
+//               }
+//             );
+
+
+//           // =================================================
+//           // SAVE TRANSFER ID
+//           // =================================================
+
+//           await pool.query(
+//             `
+//             UPDATE order_transfers
+//             SET
+//               stripe_transfer_id = $1,
+//               transfer_status = $2,
+//               updated_at = CURRENT_TIMESTAMP
+//             WHERE order_id = $3
+//             AND seller_id = $4
+//             `,
+//             [
+//               transfer.id,
+//               "completed",
+//               orderId,
+//               sellerId,
+//             ]
+//           );
+
+
+//           console.log(
+//             `✅ Transfer ${transfer.id} created`
+//           );
+
+//           console.log(
+//             `👤 Seller ${sellerId} received $${sellerAmount.toFixed(2)}`
+//           );
+
+
+//         } catch (transferError) {
+
+//           console.error(
+//             `❌ Transfer failed for seller ${sellerId}:`,
+//             transferError.message
+//           );
+
+
+//           // =================================================
+//           // SAVE FAILED STATUS
+//           // =================================================
+
+//           await pool.query(
+//             `
+//             UPDATE order_transfers
+//             SET
+//               transfer_status = $1,
+//               updated_at = CURRENT_TIMESTAMP
+//             WHERE order_id = $2
+//             AND seller_id = $3
+//             `,
+//             [
+//               "failed",
+//               orderId,
+//               sellerId,
+//             ]
+//           );
+//         }
+//       }
+
+
+//       // ==================================================
+//       // 10. GET FINAL TRANSFER SUMMARY
+//       // ==================================================
+
+//       const transferSummary =
+//         await pool.query(
+//           `
+//           SELECT
+
+//             COUNT(*) FILTER (
+//               WHERE transfer_status = 'completed'
+//             ) AS completed,
+
+//             COUNT(*) FILTER (
+//               WHERE transfer_status = 'failed'
+//             ) AS failed,
+
+//             COUNT(*) FILTER (
+//               WHERE transfer_status = 'pending'
+//             ) AS pending,
+
+//             COUNT(*) FILTER (
+//               WHERE transfer_status = 'seller_not_connected'
+//             ) AS seller_not_connected,
+
+//             COUNT(*) AS total
+
+//           FROM order_transfers
+
+//           WHERE order_id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//       const summary =
+//         transferSummary.rows[0];
+
+
+//       console.log(
+//         "======================================"
+//       );
+
+//       console.log(
+//         "📊 TRANSFER SUMMARY"
+//       );
+
+//       console.log(
+//         summary
+//       );
+
+//       console.log(
+//         "======================================"
+//       );
+
+
+//       // ==================================================
+//       // 11. UPDATE ORDER TRANSFER STATUS
+//       // ==================================================
+
+//       if (
+//         Number(summary.failed) > 0
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'partial'
+//           WHERE id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//         console.log(
+//           `⚠️ Order ${orderId} has failed seller transfers`
+//         );
+
+//       } else if (
+//         Number(summary.seller_not_connected) > 0
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'partial'
+//           WHERE id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//         console.log(
+//           `⚠️ Order ${orderId} has seller(s) without connected accounts`
+//         );
+
+//       } else if (
+//         Number(summary.pending) > 0
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'pending'
+//           WHERE id = $1
+//           `,
+//           [orderId]
+//         );
+
+//       } else if (
+//         Number(summary.completed) > 0
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'completed'
+//           WHERE id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//         console.log(
+//           `✅ All seller transfers completed for order ${orderId}`
+//         );
+
+//       } else {
+
+//         // =================================================
+//         // ONLY ADMIN PRODUCTS
+//         // =================================================
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'not_required'
+//           WHERE id = $1
+//           `,
+//           [orderId]
+//         );
+
+
+//         console.log(
+//           `🏦 Order ${orderId} contains only admin products`
+//         );
+//       }
+
+
+//       // ==================================================
+//       // 12. CLEAR CART
+//       // ==================================================
+
+//       await pool.query(
+//         `
+//         DELETE FROM cart
+//         WHERE user_id = $1
+//         `,
+//         [userId]
+//       );
+
+
+//       console.log(
+//         `🛒 Cart cleared for user ${userId}`
+//       );
+
+
+//       console.log(
+//         "======================================"
+//       );
+
+//       console.log(
+//         `✅ WEBHOOK COMPLETED FOR ORDER ${orderId}`
+//       );
+
+//       console.log(
+//         "======================================"
+//       );
+//     }
+
+
+//     // ====================================================
+//     // PAYMENT FAILED
+//     // ====================================================
+
+//     if (
+//       event.type ===
+//       "checkout.session.async_payment_failed"
+//     ) {
+
+//       const session =
+//         event.data.object;
+
+
+//       const failedOrderId =
+//         session.metadata?.orderId;
+
+
+//       if (
+//         failedOrderId
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET payment_status = 'failed'
+//           WHERE id = $1
+//           `,
+//           [failedOrderId]
+//         );
+
+
+//         console.log(
+//           `❌ Order ${failedOrderId} payment failed`
+//         );
+//       }
+//     }
+
+
+//     // ====================================================
+//     // CHECKOUT EXPIRED
+//     // ====================================================
+
+//     if (
+//       event.type ===
+//       "checkout.session.expired"
+//     ) {
+
+//       const session =
+//         event.data.object;
+
+
+//       const expiredOrderId =
+//         session.metadata?.orderId;
+
+
+//       if (
+//         expiredOrderId
+//       ) {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET payment_status = 'failed'
+//           WHERE id = $1
+//           AND payment_status = 'pending'
+//           `,
+//           [expiredOrderId]
+//         );
+
+
+//         console.log(
+//           `⌛ Checkout session expired for order ${expiredOrderId}`
+//         );
+//       }
+//     }
+
+
+//     // ====================================================
+//     // STRIPE RESPONSE
+//     // ====================================================
+
+//     return res.json({
+//       received: true,
+//     });
+
+
+//   } catch (error) {
+
+//     // ====================================================
+//     // UPDATE ORDER STATUS
+//     // ====================================================
+
+//     if (
+//       typeof orderId !==
+//       "undefined"
+//     ) {
+
+//       try {
+
+//         await pool.query(
+//           `
+//           UPDATE orders
+//           SET transfer_status = 'failed'
+//           WHERE id = $1
+//           AND transfer_status = 'pending'
+//           `,
+//           [orderId]
+//         );
+
+//       } catch (statusError) {
+
+//         console.error(
+//           "❌ Failed to update transfer status:",
+//           statusError
+//         );
+//       }
+//     }
+
+
+//     // ====================================================
+//     // LOG ERROR
+//     // ====================================================
+
+//     console.error(
+//       `❌ Stripe Webhook Processing Error for order ${
+//         typeof orderId !== "undefined"
+//           ? orderId
+//           : "unknown"
+//       }:`,
+//       error
+//     );
+
+
+//     return res.status(500).json({
+//       message:
+//         "Webhook processing failed",
+//     });
+//   }
+// };
+
+
+
+// // ======================================================
+// // EXPORT CONTROLLERS
+// // ======================================================
+
+// module.exports = {
+//   createCheckoutSession,
+//   verifyCheckoutSession,
+//   handleStripeWebhook,
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const stripe = require("../config/stripe");
 const pool = require("../config/db");
+
+const {
+  createInvoiceForPaidOrder,
+} = require("../services/invoiceService");
+const {
+  COMMISSION_PERCENTAGE,
+  calculateSellerBreakdown,
+} = require("../config/commission");
+const {
+  processSellerTransfersForPaidOrder,
+  syncSellerStripeState,
+} = require("../services/sellerTransferService");
 
 // ======================================================
 // PLATFORM COMMISSION
 // ======================================================
-
-const COMMISSION_PERCENTAGE = 10;
-
 
 // ======================================================
 // CREATE STRIPE CHECKOUT SESSION
@@ -16,12 +1786,7 @@ const createCheckoutSession = async (req, res) => {
   const client = await pool.connect();
 
   try {
-    // ==================================================
-    // START DATABASE TRANSACTION
-    // ==================================================
-
     await client.query("BEGIN");
-
 
     // ==================================================
     // GET USER CART
@@ -44,7 +1809,6 @@ const createCheckoutSession = async (req, res) => {
       [req.user.id]
     );
 
-
     // ==================================================
     // CART EMPTY
     // ==================================================
@@ -57,6 +1821,28 @@ const createCheckoutSession = async (req, res) => {
       });
     }
 
+    // ==================================================
+    // GET USER
+    // ==================================================
+
+    const userResult = await client.query(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        stripe_customer_id
+      FROM users
+      WHERE id = $1
+      `,
+      [req.user.id]
+    );
+
+    if (userResult.rows.length === 0) {
+      throw new Error("User not found");
+    }
+
+    const user = userResult.rows[0];
 
     // ==================================================
     // CALCULATE TOTAL
@@ -66,13 +1852,11 @@ const createCheckoutSession = async (req, res) => {
       (total, item) => {
         return (
           total +
-          Number(item.price) *
-            Number(item.quantity)
+          Number(item.price) * Number(item.quantity)
         );
       },
       0
     );
-
 
     // ==================================================
     // CREATE PENDING ORDER
@@ -107,10 +1891,7 @@ const createCheckoutSession = async (req, res) => {
       ]
     );
 
-
-    const orderId =
-      order.rows[0].id;
-
+    const orderId = order.rows[0].id;
 
     // ==================================================
     // CREATE ORDER ITEMS
@@ -138,6 +1919,62 @@ const createCheckoutSession = async (req, res) => {
       );
     }
 
+    // ==================================================
+    // GET OR CREATE STRIPE CUSTOMER
+    // ==================================================
+
+    let stripeCustomerId = user.stripe_customer_id;
+
+    if (stripeCustomerId) {
+      try {
+        const existingCustomer =
+          await stripe.customers.retrieve(
+            stripeCustomerId
+          );
+
+        // Stripe can return a deleted customer
+        if (existingCustomer.deleted) {
+          stripeCustomerId = null;
+        }
+      } catch (stripeCustomerError) {
+        console.log(
+          "Existing Stripe customer could not be retrieved. Creating a new one."
+        );
+
+        stripeCustomerId = null;
+      }
+    }
+
+    // ==================================================
+    // CREATE STRIPE CUSTOMER IF NEEDED
+    // ==================================================
+
+    if (!stripeCustomerId) {
+      const customer =
+        await stripe.customers.create({
+          name: user.name || undefined,
+          email: user.email || undefined,
+
+          metadata: {
+            userId: String(user.id),
+          },
+        });
+
+      stripeCustomerId = customer.id;
+
+      // Save customer ID to users table
+      await client.query(
+        `
+        UPDATE users
+        SET stripe_customer_id = $1
+        WHERE id = $2
+        `,
+        [
+          stripeCustomerId,
+          user.id,
+        ]
+      );
+    }
 
     // ==================================================
     // CREATE STRIPE LINE ITEMS
@@ -151,9 +1988,7 @@ const createCheckoutSession = async (req, res) => {
           name: item.title,
 
           metadata: {
-            productId: String(
-              item.product_id
-            ),
+            productId: String(item.product_id),
 
             // NULL means admin-owned product
             sellerId: item.seller_id
@@ -170,7 +2005,6 @@ const createCheckoutSession = async (req, res) => {
       quantity: item.quantity,
     }));
 
-
     // ==================================================
     // CREATE STRIPE CHECKOUT SESSION
     // ==================================================
@@ -178,6 +2012,10 @@ const createCheckoutSession = async (req, res) => {
     const session =
       await stripe.checkout.sessions.create({
         mode: "payment",
+
+        // IMPORTANT:
+        // Reuse our Stripe Customer
+        customer: stripeCustomerId,
 
         line_items: lineItems,
 
@@ -193,30 +2031,30 @@ const createCheckoutSession = async (req, res) => {
         },
       });
 
-
     // ==================================================
-    // SAVE STRIPE SESSION ID
+    // SAVE STRIPE SESSION + CUSTOMER ID
     // ==================================================
 
     await client.query(
       `
       UPDATE orders
-      SET stripe_session_id = $1
-      WHERE id = $2
+      SET
+        stripe_session_id = $1,
+        stripe_customer_id = $2
+      WHERE id = $3
       `,
       [
         session.id,
+        stripeCustomerId,
         orderId,
       ]
     );
-
 
     // ==================================================
     // COMMIT
     // ==================================================
 
     await client.query("COMMIT");
-
 
     // ==================================================
     // SEND CHECKOUT URL
@@ -227,10 +2065,6 @@ const createCheckoutSession = async (req, res) => {
     });
 
   } catch (error) {
-
-    // ==================================================
-    // ROLLBACK
-    // ==================================================
 
     await client.query("ROLLBACK");
 
@@ -245,11 +2079,9 @@ const createCheckoutSession = async (req, res) => {
     });
 
   } finally {
-
     client.release();
   }
 };
-
 
 
 // ======================================================
@@ -260,12 +2092,9 @@ const verifyCheckoutSession = async (
   req,
   res
 ) => {
-
   try {
 
-    const { sessionId } =
-      req.params;
-
+    const { sessionId } = req.params;
 
     // ==================================================
     // GET STRIPE SESSION
@@ -276,7 +2105,6 @@ const verifyCheckoutSession = async (
         sessionId
       );
 
-
     // ==================================================
     // CHECK SESSION USER
     // ==================================================
@@ -285,13 +2113,11 @@ const verifyCheckoutSession = async (
       session.metadata?.userId !==
       String(req.user.id)
     ) {
-
       return res.status(403).json({
         message:
           "Unauthorized payment session",
       });
     }
-
 
     // ==================================================
     // CHECK PAYMENT STATUS
@@ -301,13 +2127,11 @@ const verifyCheckoutSession = async (
       session.payment_status !==
       "paid"
     ) {
-
       return res.status(400).json({
         message:
           "Payment has not been completed",
       });
     }
-
 
     // ==================================================
     // GET ORDER ID
@@ -316,15 +2140,26 @@ const verifyCheckoutSession = async (
     const orderId =
       session.metadata?.orderId;
 
-
     if (!orderId) {
-
       return res.status(400).json({
         message:
           "Order ID not found in payment session",
       });
     }
 
+    // ==================================================
+    // GET STRIPE PAYMENT INFORMATION
+    // ==================================================
+
+    const stripeCustomerId =
+      typeof session.customer === "string"
+        ? session.customer
+        : session.customer?.id || null;
+
+    const stripePaymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id || null;
 
     // ==================================================
     // UPDATE ORDER
@@ -336,28 +2171,52 @@ const verifyCheckoutSession = async (
         UPDATE orders
         SET
           payment_status = 'paid',
-          status = 'Processing'
-        WHERE id = $1
+          status = 'Processing',
+
+          stripe_session_id =
+            COALESCE($1, stripe_session_id),
+
+          stripe_customer_id =
+            COALESCE($2, stripe_customer_id),
+
+          stripe_payment_intent_id =
+            COALESCE($3, stripe_payment_intent_id)
+
+        WHERE id = $4
         RETURNING *
         `,
-        [orderId]
+        [
+          session.id,
+          stripeCustomerId,
+          stripePaymentIntentId,
+          orderId,
+        ]
       );
-
 
     // ==================================================
     // ORDER NOT FOUND
     // ==================================================
 
-    if (
-      result.rows.length === 0
-    ) {
-
+    if (result.rows.length === 0) {
       return res.status(404).json({
         message:
           "Order not found",
       });
     }
 
+    // ==================================================
+    // CREATE / GET INVOICE
+    // ==================================================
+
+    const invoiceResult =
+      await createInvoiceForPaidOrder(
+        orderId
+      );
+
+    // The success page can reach this endpoint before (or when Stripe cannot
+    // reach) the webhook. Run the same idempotent payout work here so invoice
+    // creation never leaves a paid seller order without a transfer attempt.
+    await processSellerTransfersForPaidOrder(orderId);
 
     // ==================================================
     // CLEAR CUSTOMER CART
@@ -371,20 +2230,20 @@ const verifyCheckoutSession = async (
       [req.user.id]
     );
 
-
     // ==================================================
     // SUCCESS
     // ==================================================
 
     return res.json({
-
       message:
         "Payment verified successfully",
 
       order:
         result.rows[0],
-    });
 
+      invoice:
+        invoiceResult.invoice,
+    });
 
   } catch (error) {
 
@@ -401,7 +2260,6 @@ const verifyCheckoutSession = async (
 };
 
 
-
 // ======================================================
 // HANDLE STRIPE WEBHOOK
 // ======================================================
@@ -414,9 +2272,7 @@ const handleStripeWebhook = async (
   const signature =
     req.headers["stripe-signature"];
 
-
   let event;
-
 
   // ======================================================
   // VERIFY STRIPE WEBHOOK
@@ -443,7 +2299,6 @@ const handleStripeWebhook = async (
     );
   }
 
-
   // ======================================================
   // ONLY PROCESS RELEVANT EVENTS
   // ======================================================
@@ -458,15 +2313,12 @@ const handleStripeWebhook = async (
     event.type !==
       "checkout.session.expired"
   ) {
-
     return res.json({
       received: true,
     });
   }
 
-
   let orderId;
-
 
   try {
 
@@ -482,14 +2334,25 @@ const handleStripeWebhook = async (
       const session =
         event.data.object;
 
-
       orderId =
         session.metadata?.orderId;
-
 
       const userId =
         session.metadata?.userId;
 
+      // ==================================================
+      // STRIPE PAYMENT INFORMATION
+      // ==================================================
+
+      const stripeCustomerId =
+        typeof session.customer === "string"
+          ? session.customer
+          : session.customer?.id || null;
+
+      const stripePaymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id || null;
 
       console.log(
         "======================================"
@@ -502,6 +2365,16 @@ const handleStripeWebhook = async (
       console.log(
         "Session:",
         session.id
+      );
+
+      console.log(
+        "Customer:",
+        stripeCustomerId
+      );
+
+      console.log(
+        "Payment Intent:",
+        stripePaymentIntentId
       );
 
       console.log(
@@ -523,7 +2396,6 @@ const handleStripeWebhook = async (
         "======================================"
       );
 
-
       // ==================================================
       // CHECK METADATA
       // ==================================================
@@ -532,7 +2404,6 @@ const handleStripeWebhook = async (
         !orderId ||
         !userId
       ) {
-
         console.log(
           "❌ Missing orderId or userId"
         );
@@ -542,7 +2413,6 @@ const handleStripeWebhook = async (
         });
       }
 
-
       // ==================================================
       // CHECK PAYMENT STATUS
       // ==================================================
@@ -551,7 +2421,6 @@ const handleStripeWebhook = async (
         session.payment_status !==
         "paid"
       ) {
-
         console.log(
           `⚠️ Order ${orderId} is not paid`
         );
@@ -561,9 +2430,8 @@ const handleStripeWebhook = async (
         });
       }
 
-
       // ==================================================
-      // 1. GET ORDER
+      // GET ORDER
       // ==================================================
 
       const orderResult =
@@ -586,7 +2454,6 @@ const handleStripeWebhook = async (
           [orderId]
         );
 
-
       // ==================================================
       // ORDER NOT FOUND
       // ==================================================
@@ -604,13 +2471,11 @@ const handleStripeWebhook = async (
         });
       }
 
-
       const order =
         orderResult.rows[0];
 
-
       // ==================================================
-      // 2. MARK PAYMENT AS PAID
+      // SAVE PAYMENT INFORMATION
       // ==================================================
 
       await pool.query(
@@ -618,21 +2483,59 @@ const handleStripeWebhook = async (
         UPDATE orders
         SET
           payment_status = 'paid',
-          status = 'Processing'
-        WHERE id = $1
+          status = 'Processing',
+
+          stripe_session_id =
+            COALESCE($1, stripe_session_id),
+
+          stripe_customer_id =
+            COALESCE($2, stripe_customer_id),
+
+          stripe_payment_intent_id =
+            COALESCE($3, stripe_payment_intent_id)
+
+        WHERE id = $4
         `,
-        [orderId]
+        [
+          session.id,
+          stripeCustomerId,
+          stripePaymentIntentId,
+          orderId,
+        ]
       );
 
+      // ==================================================
+      // ALSO SAVE CUSTOMER ID TO USER
+      // ==================================================
+
+      if (stripeCustomerId) {
+        await pool.query(
+          `
+          UPDATE users
+          SET stripe_customer_id = $1
+          WHERE id = $2
+          `,
+          [
+            stripeCustomerId,
+            userId,
+          ]
+        );
+      }
+
+      // ==================================================
+      // CREATE INVOICE
+      // ==================================================
+
+      await createInvoiceForPaidOrder(
+        orderId
+      );
 
       console.log(
         `✅ Order ${orderId} marked as paid`
       );
 
-
       // ==================================================
-      // 3. CHECK WHETHER SELLER TRANSFERS
-      //    ALREADY EXIST
+      // CHECK EXISTING SELLER TRANSFERS
       // ==================================================
 
       const existingTransfers =
@@ -649,12 +2552,6 @@ const handleStripeWebhook = async (
           [orderId]
         );
 
-
-      // ==================================================
-      // IF TRANSFERS ALREADY EXIST
-      // DON'T CREATE DUPLICATES
-      // ==================================================
-
       if (
         existingTransfers.rows.some(
           (transfer) =>
@@ -666,19 +2563,21 @@ const handleStripeWebhook = async (
           `⚠️ Order ${orderId} already has seller transfers`
         );
 
+        await pool.query(
+          `
+          DELETE FROM cart
+          WHERE user_id = $1
+          `,
+          [userId]
+        );
+
         return res.json({
           received: true,
         });
       }
 
-
       // ==================================================
-      // 4. GET ORDER ITEMS
-      //
-      // IMPORTANT:
-      //
-      // LEFT JOIN users is required because
-      // admin products have seller_id = NULL.
+      // GET ORDER ITEMS
       // ==================================================
 
       const itemsResult =
@@ -706,7 +2605,6 @@ const handleStripeWebhook = async (
           [orderId]
         );
 
-
       // ==================================================
       // NO ITEMS
       // ==================================================
@@ -733,64 +2631,43 @@ const handleStripeWebhook = async (
         });
       }
 
-
       // ==================================================
-      // 5. CALCULATE ADMIN + SELLER AMOUNTS
+      // CALCULATE ADMIN + SELLER AMOUNTS
       // ==================================================
 
       let adminAmount = 0;
 
-
       const sellerAmounts = {};
 
-
       for (
-        const item
-        of itemsResult.rows
+        const item of itemsResult.rows
       ) {
 
         const amount =
           Number(item.price) *
           Number(item.quantity);
 
-
-        // =================================================
         // ADMIN PRODUCT
-        //
-        // seller_id = NULL
-        // =================================================
+        if (!item.seller_id) {
 
-        if (
-          !item.seller_id //true
-        ) {
-
-          adminAmount +=
-            amount;
-
+          adminAmount += amount;
 
           console.log(
             `🏦 Admin product ${item.product_id}: $${amount.toFixed(2)}`
           );
 
-
           continue;
         }
 
-
-        // =================================================
         // SELLER PRODUCT
-        // =================================================
-
         const sellerId =
           String(item.seller_id);
-
 
         if (
           !sellerAmounts[sellerId]
         ) {
 
           sellerAmounts[sellerId] = {
-
             grossAmount: 0,
 
             stripeAccountId:
@@ -802,86 +2679,48 @@ const handleStripeWebhook = async (
           };
         }
 
-
-        sellerAmounts[
-          sellerId
-        ].grossAmount +=
-          amount;
+        sellerAmounts[sellerId]
+          .grossAmount += amount;
       }
 
-
       // ==================================================
-      // 6. CALCULATE COMMISSION FOR EVERY SELLER
+      // CALCULATE COMMISSION
       // ==================================================
 
       let totalCommission = 0;
 
       let totalSellerPayout = 0;
 
-
       for (
-        const sellerId
-        of Object.keys(
+        const sellerId of Object.keys(
           sellerAmounts
         )
       ) {
 
         const seller =
-          sellerAmounts[
-            sellerId
-          ];
-
+          sellerAmounts[sellerId];
 
         const grossAmount =
           Number(
             seller.grossAmount
           );
 
-
-        // =================================================
-        // COMMISSION
-        // =================================================
-
-        const commissionAmount =
-          Number(
-            (
-              grossAmount *
-              (
-                COMMISSION_PERCENTAGE /
-                100
-              )
-            ).toFixed(2)
-          );
-
-
-        // =================================================
-        // SELLER PAYOUT
-        // =================================================
-
-        const sellerAmount =
-          Number(
-            (
-              grossAmount -
-              commissionAmount
-            ).toFixed(2)
-          );
-
+        const {
+          commissionAmount,
+          sellerAmount,
+        } = calculateSellerBreakdown(grossAmount);
 
         seller.commissionAmount =
           commissionAmount;
 
-
         seller.sellerAmount =
           sellerAmount;
-
 
         totalCommission +=
           commissionAmount;
 
-
         totalSellerPayout +=
           sellerAmount;
-
 
         console.log(
           "--------------------------------------"
@@ -908,13 +2747,8 @@ const handleStripeWebhook = async (
         );
       }
 
-
       // ==================================================
-      // 7. PLATFORM AMOUNT
-      //
-      // Admin products remain on platform.
-      //
-      // Platform also keeps seller commissions.
+      // PLATFORM AMOUNT
       // ==================================================
 
       const platformAmount =
@@ -924,7 +2758,6 @@ const handleStripeWebhook = async (
             totalCommission
           ).toFixed(2)
         );
-
 
       // ==================================================
       // PAYMENT BREAKDOWN
@@ -964,9 +2797,8 @@ const handleStripeWebhook = async (
         "======================================"
       );
 
-
       // ==================================================
-      // 8. SAVE ORDER FINANCIAL SUMMARY
+      // SAVE ORDER FINANCIAL SUMMARY
       // ==================================================
 
       await pool.query(
@@ -986,55 +2818,61 @@ const handleStripeWebhook = async (
         ]
       );
 
-
       // ==================================================
-      // 9. CREATE TRANSFER RECORDS + STRIPE TRANSFERS
+      // CREATE SELLER TRANSFERS
       // ==================================================
 
       for (
-        const sellerId
-        of Object.keys(
+        const sellerId of Object.keys(
           sellerAmounts
         )
       ) {
 
         const seller =
-          sellerAmounts[
-            sellerId
-          ];
-
+          sellerAmounts[sellerId];
 
         const grossAmount =
           Number(
             seller.grossAmount
           );
 
-
         const commissionAmount =
           Number(
             seller.commissionAmount
           );
-
 
         const sellerAmount =
           Number(
             seller.sellerAmount
           );
 
-
         // =================================================
-        // SELLER HAS NO CONNECTED ACCOUNT
+        // VERIFY THE SELLER HAS A VALID STRIPE ACCOUNT
         // =================================================
 
-        if (
-          !seller.stripeAccountId
-        ) {
+        let destinationAccount = null;
 
+        if (!seller.stripeAccountId) {
           console.log(
             `⚠️ Seller ${sellerId} has no Stripe connected account`
           );
+        } else {
+          try {
+            destinationAccount = await stripe.accounts.retrieve(
+              seller.stripeAccountId
+            );
+          } catch (accountError) {
+            console.warn(
+              `⚠️ Seller ${sellerId} Stripe account is invalid or missing: ${accountError.message}`
+            );
+          }
+        }
 
-
+        if (
+          !seller.stripeAccountId ||
+          !destinationAccount ||
+          !destinationAccount.payouts_enabled
+        ) {
           await pool.query(
             `
             INSERT INTO order_transfers
@@ -1052,7 +2890,6 @@ const handleStripeWebhook = async (
 
             ON CONFLICT (order_id, seller_id)
             DO UPDATE SET
-
               transfer_status =
                 EXCLUDED.transfer_status,
 
@@ -1062,7 +2899,7 @@ const handleStripeWebhook = async (
             [
               orderId,
               sellerId,
-              "not_connected",
+              seller.stripeAccountId || "not_connected",
               grossAmount,
               commissionAmount,
               sellerAmount,
@@ -1070,10 +2907,12 @@ const handleStripeWebhook = async (
             ]
           );
 
-
           continue;
         }
 
+        // Keep the seller's persisted Connect state in sync with the account
+        // that is about to receive this transfer.
+        await syncSellerStripeState(sellerId, destinationAccount);
 
         // =================================================
         // CONVERT TO STRIPE CENTS
@@ -1083,7 +2922,6 @@ const handleStripeWebhook = async (
           Math.round(
             sellerAmount * 100
           );
-
 
         // =================================================
         // INVALID AMOUNT
@@ -1110,7 +2948,6 @@ const handleStripeWebhook = async (
 
             ON CONFLICT (order_id, seller_id)
             DO UPDATE SET
-
               transfer_status =
                 EXCLUDED.transfer_status,
 
@@ -1128,13 +2965,11 @@ const handleStripeWebhook = async (
             ]
           );
 
-
           continue;
         }
 
-
         // =================================================
-        // CHECK EXISTING SELLER TRANSFER RECORD
+        // CHECK EXISTING TRANSFER
         // =================================================
 
         const transferRecord =
@@ -1154,11 +2989,6 @@ const handleStripeWebhook = async (
             ]
           );
 
-
-        // =================================================
-        // TRANSFER ALREADY CREATED
-        // =================================================
-
         if (
           transferRecord.rows.length > 0 &&
           transferRecord.rows[0]
@@ -1171,7 +3001,6 @@ const handleStripeWebhook = async (
 
           continue;
         }
-
 
         // =================================================
         // CREATE / UPDATE TRANSFER RECORD
@@ -1194,7 +3023,6 @@ const handleStripeWebhook = async (
 
           ON CONFLICT (order_id, seller_id)
           DO UPDATE SET
-
             stripe_account_id =
               EXCLUDED.stripe_account_id,
 
@@ -1224,57 +3052,14 @@ const handleStripeWebhook = async (
           ]
         );
 
-
         // =================================================
         // CREATE STRIPE TRANSFER
         // =================================================
 
         try {
 
-          console.log(
-            "======================================"
-          );
-
-          console.log(
-            `🚀 CREATING TRANSFER`
-          );
-
-          console.log(
-            `Order: ${orderId}`
-          );
-
-          console.log(
-            `Seller: ${sellerId}`
-          );
-
-          console.log(
-            `Stripe account: ${seller.stripeAccountId}`
-          );
-
-          console.log(
-            `Gross: $${grossAmount.toFixed(2)}`
-          );
-
-          console.log(
-            `Commission: $${commissionAmount.toFixed(2)}`
-          );
-
-          console.log(
-            `Seller payout: $${sellerAmount.toFixed(2)}`
-          );
-
-          console.log(
-            "======================================"
-          );
-
-
-          // =================================================
-          // STRIPE TRANSFER
-          // =================================================
-
           const transfer =
             await stripe.transfers.create(
-
               {
                 amount:
                   transferAmount,
@@ -1286,7 +3071,6 @@ const handleStripeWebhook = async (
                   seller.stripeAccountId,
 
                 metadata: {
-
                   orderId:
                     String(orderId),
 
@@ -1303,20 +3087,11 @@ const handleStripeWebhook = async (
                     sellerAmount.toFixed(2),
                 },
               },
-
               {
-                // =================================================
-                // IMPORTANT
-                //
-                // Stripe will not create another transfer if the
-                // same webhook is processed again.
-                // =================================================
-
                 idempotencyKey:
                   `order-${orderId}-seller-${sellerId}`,
               }
             );
-
 
           // =================================================
           // SAVE TRANSFER ID
@@ -1340,7 +3115,6 @@ const handleStripeWebhook = async (
             ]
           );
 
-
           console.log(
             `✅ Transfer ${transfer.id} created`
           );
@@ -1349,18 +3123,12 @@ const handleStripeWebhook = async (
             `👤 Seller ${sellerId} received $${sellerAmount.toFixed(2)}`
           );
 
-
         } catch (transferError) {
 
           console.error(
             `❌ Transfer failed for seller ${sellerId}:`,
             transferError.message
           );
-
-
-          // =================================================
-          // SAVE FAILED STATUS
-          // =================================================
 
           await pool.query(
             `
@@ -1380,9 +3148,8 @@ const handleStripeWebhook = async (
         }
       }
 
-
       // ==================================================
-      // 10. GET FINAL TRANSFER SUMMARY
+      // FINAL TRANSFER SUMMARY
       // ==================================================
 
       const transferSummary =
@@ -1415,30 +3182,16 @@ const handleStripeWebhook = async (
           [orderId]
         );
 
-
       const summary =
         transferSummary.rows[0];
 
-
       console.log(
-        "======================================"
-      );
-
-      console.log(
-        "📊 TRANSFER SUMMARY"
-      );
-
-      console.log(
+        "📊 TRANSFER SUMMARY",
         summary
       );
 
-      console.log(
-        "======================================"
-      );
-
-
       // ==================================================
-      // 11. UPDATE ORDER TRANSFER STATUS
+      // UPDATE ORDER TRANSFER STATUS
       // ==================================================
 
       if (
@@ -1454,13 +3207,10 @@ const handleStripeWebhook = async (
           [orderId]
         );
 
-
-        console.log(
-          `⚠️ Order ${orderId} has failed seller transfers`
-        );
-
       } else if (
-        Number(summary.seller_not_connected) > 0
+        Number(
+          summary.seller_not_connected
+        ) > 0
       ) {
 
         await pool.query(
@@ -1470,11 +3220,6 @@ const handleStripeWebhook = async (
           WHERE id = $1
           `,
           [orderId]
-        );
-
-
-        console.log(
-          `⚠️ Order ${orderId} has seller(s) without connected accounts`
         );
 
       } else if (
@@ -1503,16 +3248,7 @@ const handleStripeWebhook = async (
           [orderId]
         );
 
-
-        console.log(
-          `✅ All seller transfers completed for order ${orderId}`
-        );
-
       } else {
-
-        // =================================================
-        // ONLY ADMIN PRODUCTS
-        // =================================================
 
         await pool.query(
           `
@@ -1522,16 +3258,10 @@ const handleStripeWebhook = async (
           `,
           [orderId]
         );
-
-
-        console.log(
-          `🏦 Order ${orderId} contains only admin products`
-        );
       }
 
-
       // ==================================================
-      // 12. CLEAR CART
+      // CLEAR CART
       // ==================================================
 
       await pool.query(
@@ -1542,25 +3272,14 @@ const handleStripeWebhook = async (
         [userId]
       );
 
-
       console.log(
         `🛒 Cart cleared for user ${userId}`
-      );
-
-
-      console.log(
-        "======================================"
       );
 
       console.log(
         `✅ WEBHOOK COMPLETED FOR ORDER ${orderId}`
       );
-
-      console.log(
-        "======================================"
-      );
     }
-
 
     // ====================================================
     // PAYMENT FAILED
@@ -1574,31 +3293,47 @@ const handleStripeWebhook = async (
       const session =
         event.data.object;
 
-
       const failedOrderId =
         session.metadata?.orderId;
 
-
-      if (
-        failedOrderId
-      ) {
+      if (failedOrderId) {
 
         await pool.query(
           `
           UPDATE orders
-          SET payment_status = 'failed'
-          WHERE id = $1
-          `,
-          [failedOrderId]
-        );
+          SET
+            payment_status = 'failed',
 
+            stripe_session_id =
+              COALESCE($1, stripe_session_id),
+
+            stripe_customer_id =
+              COALESCE($2, stripe_customer_id),
+
+            stripe_payment_intent_id =
+              COALESCE($3, stripe_payment_intent_id)
+
+          WHERE id = $4
+          `,
+          [
+            session.id,
+            typeof session.customer === "string"
+              ? session.customer
+              : session.customer?.id || null,
+
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent?.id || null,
+
+            failedOrderId,
+          ]
+        );
 
         console.log(
           `❌ Order ${failedOrderId} payment failed`
         );
       }
     }
-
 
     // ====================================================
     // CHECKOUT EXPIRED
@@ -1612,32 +3347,49 @@ const handleStripeWebhook = async (
       const session =
         event.data.object;
 
-
       const expiredOrderId =
         session.metadata?.orderId;
 
-
-      if (
-        expiredOrderId
-      ) {
+      if (expiredOrderId) {
 
         await pool.query(
           `
           UPDATE orders
-          SET payment_status = 'failed'
-          WHERE id = $1
+          SET
+            payment_status = 'failed',
+
+            stripe_session_id =
+              COALESCE($1, stripe_session_id),
+
+            stripe_customer_id =
+              COALESCE($2, stripe_customer_id),
+
+            stripe_payment_intent_id =
+              COALESCE($3, stripe_payment_intent_id)
+
+          WHERE id = $4
           AND payment_status = 'pending'
           `,
-          [expiredOrderId]
-        );
+          [
+            session.id,
 
+            typeof session.customer === "string"
+              ? session.customer
+              : session.customer?.id || null,
+
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent?.id || null,
+
+            expiredOrderId,
+          ]
+        );
 
         console.log(
           `⌛ Checkout session expired for order ${expiredOrderId}`
         );
       }
     }
-
 
     // ====================================================
     // STRIPE RESPONSE
@@ -1646,7 +3398,6 @@ const handleStripeWebhook = async (
     return res.json({
       received: true,
     });
-
 
   } catch (error) {
 
@@ -1680,11 +3431,6 @@ const handleStripeWebhook = async (
       }
     }
 
-
-    // ====================================================
-    // LOG ERROR
-    // ====================================================
-
     console.error(
       `❌ Stripe Webhook Processing Error for order ${
         typeof orderId !== "undefined"
@@ -1694,14 +3440,12 @@ const handleStripeWebhook = async (
       error
     );
 
-
     return res.status(500).json({
       message:
         "Webhook processing failed",
     });
   }
 };
-
 
 
 // ======================================================

@@ -793,6 +793,63 @@ const getSellerDashboardStats = async (req, res) => {
     );
 
     // ----------------------------------------
+    // Stripe Connect payout statistics
+    // ----------------------------------------
+    // `seller_amount` is the net amount transferred after the platform
+    // commission. Restrict every query by seller_id so sellers can only see
+    // their own payouts.
+    const payoutStats = await pool.query(
+      `
+      SELECT
+        COALESCE(
+          SUM(seller_amount) FILTER (
+            WHERE transfer_status = 'completed'
+          ),
+          0
+        ) AS received,
+
+        COALESCE(
+          SUM(seller_amount) FILTER (
+            WHERE transfer_status = 'pending'
+          ),
+          0
+        ) AS pending,
+
+        COALESCE(
+          SUM(commission_amount) FILTER (
+            WHERE transfer_status = 'completed'
+          ),
+          0
+        ) AS commission,
+
+        COUNT(*) FILTER (
+          WHERE transfer_status = 'completed'
+        ) AS completed_count
+      FROM order_transfers
+      WHERE seller_id = $1
+      `,
+      [sellerId]
+    );
+
+    const recentPayouts = await pool.query(
+      `
+      SELECT
+        ot.order_id,
+        ot.gross_amount,
+        ot.commission_amount,
+        ot.seller_amount,
+        ot.stripe_transfer_id,
+        ot.transfer_status,
+        ot.updated_at
+      FROM order_transfers ot
+      WHERE ot.seller_id = $1
+      ORDER BY ot.updated_at DESC NULLS LAST, ot.id DESC
+      LIMIT 5
+      `,
+      [sellerId]
+    );
+
+    // ----------------------------------------
     // Response
     // ----------------------------------------
 
@@ -813,6 +870,14 @@ const getSellerDashboardStats = async (req, res) => {
           total: Number(orderStats.rows[0].total_orders),
           itemsSold: Number(orderStats.rows[0].total_items_sold),
           revenue: Number(orderStats.rows[0].total_revenue),
+        },
+
+        payouts: {
+          received: Number(payoutStats.rows[0].received),
+          pending: Number(payoutStats.rows[0].pending),
+          commission: Number(payoutStats.rows[0].commission),
+          completedCount: Number(payoutStats.rows[0].completed_count),
+          recent: recentPayouts.rows,
         },
       },
     });

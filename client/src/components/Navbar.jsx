@@ -407,6 +407,19 @@ function Navbar() {
                         📦 My Orders
                       </Link>
 
+                      <Link
+                        to="/my-invoices"
+                        onClick={() => setOpen(false)}
+                        className="
+                          block
+                          px-5
+                          py-3
+                          hover:bg-gray-100
+                        "
+                      >
+                        🧾 My Invoices
+                      </Link>
+
                       {/* BECOME A SELLER */}
 
                       {user?.role === "customer" && (
@@ -681,6 +694,21 @@ function Navbar() {
                   "
                 >
                   📦 My Orders
+                </Link>
+
+                <Link
+                  to="/my-invoices"
+                  onClick={closeMobileMenu}
+                  className="
+                    block
+                    px-4
+                    py-3
+                    rounded-lg
+                    hover:bg-gray-100
+                    transition
+                  "
+                >
+                  🧾 My Invoices
                 </Link>
 
                 {/* ADMIN */}
