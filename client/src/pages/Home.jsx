@@ -594,13 +594,18 @@ function Home() {
           LATEST PRODUCTS
       ================================================= */}
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div id="shop-products" className="page-container">
 
         <section>
 
-          <h2 className="text-3xl font-bold mb-6">
+          <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="section-title">
             Latest Products
           </h2>
+              <p className="section-copy">Explore fresh picks from our marketplace.</p>
+            </div>
+          </div>
 
 
           {/* =================================================
@@ -609,9 +614,7 @@ function Home() {
 
           {loading && (
 
-            <h2>
-              Loading...
-            </h2>
+            <div className="empty-state">Loading products...</div>
 
           )}
 
@@ -622,9 +625,9 @@ function Home() {
 
           {error && (
 
-            <h2 className="text-red-500">
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-600">
               {error}
-            </h2>
+            </div>
 
           )}
 
@@ -641,7 +644,8 @@ function Home() {
                 grid-cols-1
                 sm:grid-cols-2
                 lg:grid-cols-4
-                gap-6
+                gap-5
+                md:gap-6
               "
             >
 
@@ -670,8 +674,8 @@ function Home() {
               flex
               justify-center
               items-center
-              gap-4
-              mt-10
+              gap-3
+              mt-12
             "
           >
 
@@ -683,11 +687,15 @@ function Home() {
                 setPage(page - 1)
               }
               className="
-                bg-gray-300
-                px-4
-                py-2
-                rounded
-                disabled:opacity-50
+                rounded-xl
+                border border-slate-200
+                bg-white
+                px-5
+                py-2.5
+                font-semibold
+                text-slate-700
+                shadow-sm
+                transition hover:border-blue-200 hover:text-blue-700
               "
             >
 
@@ -696,7 +704,7 @@ function Home() {
             </button>
 
 
-            <span>
+            <span className="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-600">
               Page {currentPage} of {totalPages}
             </span>
 
@@ -709,12 +717,15 @@ function Home() {
                 setPage(page + 1)
               }
               className="
+                rounded-xl
                 bg-blue-600
+                px-5
+                py-2.5
+                font-semibold
                 text-white
-                px-4
-                py-2
-                rounded
-                disabled:opacity-50
+                shadow-sm
+                shadow-blue-600/25
+                transition hover:bg-blue-700 hover:shadow-md
               "
             >
 

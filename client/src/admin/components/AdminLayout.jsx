@@ -5,9 +5,9 @@ import Topbar from "./Topbar";
 
 function AdminLayout() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-blue-50/60">
 
-      <div className="flex flex-col sm:flex-row">
+      <div className="flex min-h-screen flex-col lg:flex-row">
 
         {/* ================= SIDEBAR ================= */}
 
@@ -15,12 +15,12 @@ function AdminLayout() {
           className="
             w-full
             shrink-0
-            sm:w-64
-            sm:sticky
-            sm:top-0
-            sm:h-screen
+            lg:w-64
+            lg:sticky
+            lg:top-0
+            lg:h-screen
             overflow-y-auto
-            bg-slate-900
+            bg-slate-950
           "
         >
           <Sidebar />
@@ -42,9 +42,10 @@ function AdminLayout() {
 
           <main
             className="
-              p-4
-              sm:p-6
-              lg:p-8
+            p-4
+            sm:p-6
+            lg:p-8
+            xl:p-10
               min-h-[calc(100vh-64px)]
             "
           >

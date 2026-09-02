@@ -91,32 +91,32 @@ function SellerDashboard() {
   };
 
   return (
-    <div>
+    <div className="space-y-8">
 
       {/* ================= HEADER ================= */}
 
-      <h1 className="text-3xl font-bold text-gray-800">
+      <h1 className="section-title">
         Seller Dashboard
       </h1>
 
-      <p className="mt-2 text-gray-500">
+      <p className="section-copy">
         Welcome to your seller dashboard.
       </p>
 
 
       {/* ================= STATISTICS ================= */}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
 
         {/* PRODUCTS */}
 
-        <div className="bg-white p-6 rounded-xl shadow">
+        <div className="surface-card p-6">
 
-          <p className="text-gray-500">
+          <p className="text-sm font-medium text-slate-500">
             Products
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold text-slate-900">
             {totalProducts}
           </h2>
 
@@ -125,13 +125,13 @@ function SellerDashboard() {
 
         {/* ORDERS */}
 
-        <div className="bg-white p-6 rounded-xl shadow">
+        <div className="surface-card p-6">
 
-          <p className="text-gray-500">
+          <p className="text-sm font-medium text-slate-500">
             Orders
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold text-slate-900">
             {totalOrders}
           </h2>
 
@@ -140,13 +140,13 @@ function SellerDashboard() {
 
         {/* SALES */}
 
-        <div className="bg-white p-6 rounded-xl shadow">
+        <div className="surface-card p-6">
 
-          <p className="text-gray-500">
+          <p className="text-sm font-medium text-slate-500">
             Sales
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold text-slate-900">
             {formatPrice(totalRevenue)}
           </h2>
 
@@ -156,7 +156,7 @@ function SellerDashboard() {
 
       {/* ================= STRIPE PAYOUTS ================= */}
 
-      <section className="mt-8 rounded-xl bg-white p-6 shadow">
+      <section className="surface-card p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
@@ -192,7 +192,7 @@ function SellerDashboard() {
           </div>
         </div>
 
-        <div className="mt-7 overflow-x-auto">
+        <div className="mt-7 overflow-x-auto rounded-xl border border-slate-100">
           <h3 className="mb-3 font-semibold text-gray-800">Recent payout activity</h3>
           {recentPayouts.length === 0 ? (
             <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-500">

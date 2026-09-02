@@ -204,22 +204,22 @@ function Dashboard() {
 
           <div
             key={item.title}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
+            className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-md"
           >
 
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-4">
 
-              <div>
+              <div className="min-w-0 flex-1">
 
                 <p className="text-sm font-medium text-gray-500">
                   {item.title}
                 </p>
 
-                <h2 className="text-3xl font-bold text-gray-800 mt-3">
+                <h2 className="mt-3 text-3xl font-bold text-gray-800">
                   {item.value}
                 </h2>
 
-                <div className="flex items-center gap-1 mt-3 text-sm text-green-600">
+                <div className="mt-3 flex items-center gap-1 text-sm text-green-600">
 
                   <FaArrowUp size={11} />
 
@@ -232,7 +232,7 @@ function Dashboard() {
               </div>
 
               <div
-                className={`${item.iconBg} ${item.iconColor} p-4 rounded-xl`}
+                className={`${item.iconBg} ${item.iconColor} flex h-14 w-14 items-center justify-center rounded-xl shrink-0`}
               >
                 {item.icon}
               </div>

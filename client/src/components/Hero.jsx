@@ -1,7 +1,19 @@
 
 function Hero() {
+  const handleShopNow = () => {
+    const productsSection = document.getElementById("shop-products");
+
+    if (productsSection) {
+      productsSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   return (
-    <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-800 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(96,165,250,0.35),_transparent_38%)]" />
       <div
         className="
           max-w-7xl
@@ -9,9 +21,9 @@ function Hero() {
           px-4
           sm:px-6
           lg:px-8
-          py-12
-          sm:py-16
-          lg:py-24
+          py-14
+          sm:py-20
+          lg:py-28
           flex
           flex-col
           md:flex-row
@@ -29,7 +41,9 @@ function Hero() {
           className="
             w-full
             md:w-1/2
-            max-w-lg
+          relative
+          z-10
+          max-w-xl
             text-center
             md:text-left
           "
@@ -39,7 +53,8 @@ function Hero() {
               text-4xl
               sm:text-5xl
               lg:text-6xl
-              font-bold
+              font-extrabold
+              tracking-tight
               leading-tight
             "
           >
@@ -52,7 +67,7 @@ function Hero() {
               sm:mt-6
               text-base
               sm:text-lg
-              text-blue-100
+              text-blue-100/90
               leading-relaxed
             "
           >
@@ -61,6 +76,7 @@ function Hero() {
           </p>
 
           <button
+            onClick={handleShopNow}
             className="
               mt-7
               sm:mt-8
@@ -69,12 +85,14 @@ function Hero() {
               px-7
               sm:px-8
               py-3
-              rounded-lg
+              rounded-xl
               font-semibold
               hover:bg-gray-100
               transition
-              shadow-md
-              hover:shadow-lg
+              shadow-lg
+              shadow-blue-950/30
+              hover:-translate-y-0.5
+              hover:shadow-xl
             "
           >
             Shop Now
@@ -98,13 +116,18 @@ function Hero() {
             src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
             alt="Shopping"
             className="
+              relative
+              z-10
               w-full
               max-w-xs
               sm:max-w-sm
               md:max-w-md
               lg:w-96
-              rounded-xl
+              rounded-3xl
+              border
+              border-white/15
               shadow-2xl
+              shadow-blue-950/40
               object-cover
             "
           />

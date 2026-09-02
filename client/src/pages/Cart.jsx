@@ -62,9 +62,9 @@ function Cart() {
     <>
       <Navbar />
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="page-container">
 
-        <h1 className="text-4xl font-bold mb-8">
+        <h1 className="section-title mb-8 sm:text-4xl">
           Shopping Cart
         </h1>
 
@@ -75,9 +75,7 @@ function Cart() {
 
             {cartItems.length === 0 ? (
 
-              <h2 className="text-xl text-gray-500">
-                Your cart is empty.
-              </h2>
+              <div className="empty-state">Your cart is empty.</div>
 
             ) : (
 
@@ -85,22 +83,22 @@ function Cart() {
 
                 <div
                   key={item.id}
-                  className="flex items-center gap-6 bg-white p-4 rounded-xl shadow-md mb-5"
+                  className="mb-5 flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center"
                 >
 
                   <img
                     src={`${IMAGE_URL}${item.image}`}
                     alt={item.title}
-                    className="w-28 h-28 object-contain"
+                    className="h-28 w-28 rounded-xl bg-slate-50 object-contain p-2"
                   />
 
                   <div className="flex-1">
 
-                    <h2 className="font-bold text-lg">
+                    <h2 className="text-lg font-bold text-slate-800">
                       {item.title}
                     </h2>
 
-                    <p className="text-blue-600 font-semibold mt-2">
+                    <p className="mt-2 font-semibold text-blue-700">
                       {formatPrice(item.price)}
                     </p>
 
@@ -115,7 +113,7 @@ function Cart() {
                             })
                           )
                         }
-                        className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+                        className="rounded-lg bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-200"
                       >
                         -
                       </button>
@@ -133,7 +131,7 @@ function Cart() {
                             })
                           )
                         }
-                        className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+                        className="rounded-lg bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-200"
                       >
                         +
                       </button>
@@ -144,7 +142,7 @@ function Cart() {
                       onClick={() =>
                         dispatch(deleteItem(item.id))
                       }
-                      className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                      className="mt-4 rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                     >
                       Remove
                     </button>
@@ -160,9 +158,9 @@ function Cart() {
           </div>
 
           {/* Right Side */}
-          <div className="bg-white shadow-lg rounded-xl p-6 h-fit">
+          <div className="surface-card h-fit p-6 lg:sticky lg:top-24">
 
-            <h2 className="text-2xl font-bold mb-6">
+            <h2 className="mb-6 text-2xl font-bold text-slate-800">
               Order Summary
             </h2>
 
@@ -187,7 +185,7 @@ function Cart() {
 
             <button
               onClick={handleCheckout}
-              className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition"
+              className="mt-6 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-sm shadow-blue-600/30 transition hover:bg-blue-700 hover:shadow-md"
             >
               Checkout
             </button>
