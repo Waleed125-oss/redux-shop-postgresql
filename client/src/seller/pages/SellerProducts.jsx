@@ -145,6 +145,10 @@ function SellerProducts() {
                 </th>
 
                 <th className="px-6 py-4 text-left">
+                  Stock
+                </th>
+
+                <th className="px-6 py-4 text-left">
                   Status
                 </th>
 
@@ -193,6 +197,11 @@ function SellerProducts() {
 
                   <td className="px-6 py-4">
                     {formatPrice(product.price)}
+                  </td>
+
+
+                  <td className="px-6 py-4">
+                    {product.stock}
                   </td>
 
 
@@ -288,7 +297,7 @@ function SellerProducts() {
                 <tr>
 
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="px-6 py-10 text-center text-gray-500"
                   >
                     No products found.

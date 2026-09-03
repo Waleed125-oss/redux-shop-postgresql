@@ -37,6 +37,7 @@ function SellerEditProduct() {
   const [formData, setFormData] = useState({
     title: "",
     price: "",
+    stock: "",
     description: "",
     category_id: "",
     rating: "",
@@ -103,6 +104,7 @@ function SellerEditProduct() {
         setFormData({
           title: product.title || "",
           price: product.price || "",
+          stock: product.stock ?? "",
           description:
             product.description || "",
           category_id:
@@ -180,6 +182,11 @@ function SellerEditProduct() {
     data.append(
       "price",
       formData.price
+    );
+
+    data.append(
+      "stock",
+      formData.stock
     );
 
     data.append(
@@ -377,6 +384,35 @@ function SellerEditProduct() {
             value={formData.price}
             onChange={handleChange}
             placeholder="Enter price"
+            className="
+              w-full
+              border
+              rounded-lg
+              px-4
+              py-3
+            "
+            required
+          />
+
+        </div>
+
+
+        {/* STOCK */}
+
+        <div>
+
+          <label className="block mb-2 font-medium">
+            Stock Quantity
+          </label>
+
+          <input
+            type="number"
+            name="stock"
+            min="0"
+            step="1"
+            value={formData.stock}
+            onChange={handleChange}
+            placeholder="Enter stock quantity"
             className="
               w-full
               border

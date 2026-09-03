@@ -54,7 +54,9 @@ const PaymentSuccess = () => {
         console.error("Payment verification error:", error);
 
         setStatus("error");
-        setMessage(error.message);
+        setMessage(
+          error.message || "Failed to verify payment"
+        );
       }
     };
 

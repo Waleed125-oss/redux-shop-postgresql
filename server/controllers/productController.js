@@ -327,6 +327,10 @@ const getProducts = async (req, res) => {
   }
 };
 
+
+
+
+
 // Home Product Sections
 
 // ================= HOME PRODUCT SECTIONS =================
@@ -564,6 +568,7 @@ const createProduct = async (req, res) => {
       description,
       category_id,
       rating,
+      stock,
     } = req.body;
 
 
@@ -624,6 +629,20 @@ const createProduct = async (req, res) => {
       });
     }
 
+    // ================= STOCK VALIDATION =================
+
+if (
+  stock === undefined ||
+  stock === null ||
+  stock === "" ||
+  !Number.isInteger(Number(stock)) ||
+  Number(stock) < 0
+) {
+  return res.status(400).json({
+    message: "Stock must be a non-negative integer",
+  });
+}
+
 
     // ================= INSERT PRODUCT =================
 
@@ -637,11 +656,12 @@ const createProduct = async (req, res) => {
         category_id,
         image,
         rating,
+        stock,
         is_active
       )
 
       VALUES
-      ($1,$2,$3,$4,$5,$6,TRUE)
+      ($1,$2,$3,$4,$5,$6,$7,TRUE)
 
       RETURNING *
       `,
@@ -652,6 +672,7 @@ const createProduct = async (req, res) => {
         category_id,
         mainImage,
         rating,
+        Number(stock),
       ]
     );
 
@@ -723,6 +744,7 @@ const createSellerProduct = async (req, res) => {
       description,
       category_id,
       rating,
+      stock,
     } = req.body;
 
     // ================= MAIN IMAGE =================
@@ -780,6 +802,20 @@ const createSellerProduct = async (req, res) => {
       });
     }
 
+    // ================= STOCK VALIDATION =================
+
+if (
+  stock === undefined ||
+  stock === null ||
+  stock === "" ||
+  !Number.isInteger(Number(stock)) ||
+  Number(stock) < 0
+) {
+  return res.status(400).json({
+    message: "Stock must be a non-negative integer",
+  });
+}
+
     // ================= INSERT PRODUCT =================
 
     const result = await pool.query(
@@ -792,6 +828,7 @@ const createSellerProduct = async (req, res) => {
         category_id,
         image,
         rating,
+        stock,
         is_active,
         seller_id,
         approval_status
@@ -805,8 +842,9 @@ const createSellerProduct = async (req, res) => {
         $4,
         $5,
         $6,
-        TRUE,
         $7,
+        TRUE,
+        $8,
         'pending'
       )
 
@@ -819,6 +857,7 @@ const createSellerProduct = async (req, res) => {
         Number(category_id),
         mainImage,
         Number(rating),
+        Number(stock),
         sellerId,
       ]
     );
@@ -1346,6 +1385,7 @@ const updateProduct = async (req, res) => {
       description,
       category_id,
       rating,
+      stock,
     } = req.body;
 
     // ================= MAIN IMAGE =================
@@ -1394,6 +1434,18 @@ const updateProduct = async (req, res) => {
       });
     }
 
+    if (
+  stock === undefined ||
+  stock === null ||
+  stock === "" ||
+  !Number.isInteger(Number(stock)) ||
+  Number(stock) < 0
+) {
+  return res.status(400).json({
+    message: "Stock must be a non-negative integer",
+  });
+}
+
 
     // ================= UPDATE PRODUCT =================
 
@@ -1407,9 +1459,10 @@ const updateProduct = async (req, res) => {
         description = $3,
         category_id = $4,
         image = COALESCE($5, image),
-        rating = $6
-
-      WHERE id = $7
+        rating = $6,
+        stock = $7
+        
+      WHERE id = $8
 
       RETURNING *
       `,
@@ -1420,6 +1473,7 @@ const updateProduct = async (req, res) => {
         category_id,
         imagePath,
         rating,
+        Number(stock),
         id,
       ]
     );

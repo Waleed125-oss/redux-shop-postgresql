@@ -168,6 +168,7 @@ const createSellerProduct = async (req, res) => {
     const {
       title,
       price,
+      stock,
       description,
       category_id,
       rating,
@@ -208,6 +209,18 @@ const createSellerProduct = async (req, res) => {
       });
     }
 
+    if (
+      stock === undefined ||
+      stock === null ||
+      stock === "" ||
+      !Number.isInteger(Number(stock)) ||
+      Number(stock) < 0
+    ) {
+      return res.status(400).json({
+        message: "Stock must be a non-negative integer",
+      });
+    }
+
     // ================= MAIN IMAGE =================
 
     const mainImageFile = req.files?.image?.[0];
@@ -238,6 +251,7 @@ const createSellerProduct = async (req, res) => {
         category_id,
         image,
         rating,
+        stock,
         is_active,
         seller_id,
         approval_status
@@ -251,8 +265,9 @@ const createSellerProduct = async (req, res) => {
         $4,
         $5,
         $6,
-        FALSE,
         $7,
+        FALSE,
+        $8,
         'pending'
       )
 
@@ -265,6 +280,7 @@ const createSellerProduct = async (req, res) => {
         category_id,
         mainImage,
         rating || 0,
+        Number(stock),
         sellerId,
       ]
     );
@@ -465,6 +481,7 @@ const updateSellerProduct = async (req, res) => {
     const {
       title,
       price,
+      stock,
       description,
       category_id,
     } = req.body;
@@ -505,6 +522,23 @@ const updateSellerProduct = async (req, res) => {
         ? category_id
         : product.category_id;
 
+    const updatedStock =
+      stock !== undefined
+        ? stock
+        : product.stock;
+
+    if (
+      updatedStock === undefined ||
+      updatedStock === null ||
+      updatedStock === "" ||
+      !Number.isInteger(Number(updatedStock)) ||
+      Number(updatedStock) < 0
+    ) {
+      return res.status(400).json({
+        message: "Stock must be a non-negative integer",
+      });
+    }
+
     // Optional new image
     let updatedImage = product.image;
 
@@ -523,10 +557,11 @@ const updateSellerProduct = async (req, res) => {
     description = $3,
     category_id = $4,
     image = $5,
+    stock = $6,
     approval_status = 'pending'
 
-  WHERE id = $6
-  AND seller_id = $7
+  WHERE id = $7
+  AND seller_id = $8
 
   RETURNING *
   `,
@@ -536,6 +571,7 @@ const updateSellerProduct = async (req, res) => {
     updatedDescription,
     updatedCategory,
     updatedImage,
+    Number(updatedStock),
     productId,
     sellerId,
   ]
@@ -982,6 +1018,7 @@ const getSellerProducts = async (req, res) => {
         p.description,
         p.image,
         p.rating,
+        p.stock,
         p.category_id,
         p.is_active,
         p.created_at,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { fetchMyInvoicesAPI } from "../services/api";
 
 const formatMoney = (amount, currency = "USD") =>
@@ -113,6 +114,7 @@ function MyInvoices() {
           </div>
         )}
       </main>
+      <Footer />
     </>
   );
 }

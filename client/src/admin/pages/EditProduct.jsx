@@ -192,6 +192,9 @@ function EditProduct() {
   const [price, setPrice] =
     useState("");
 
+  const [stock, setStock] =
+    useState("");
+
   const [description, setDescription] =
     useState("");
 
@@ -255,6 +258,10 @@ function EditProduct() {
 
     setPrice(
       product.price || ""
+    );
+
+    setStock(
+      product.stock ?? ""
     );
 
     setDescription(
@@ -343,6 +350,11 @@ function EditProduct() {
         formData.append(
           "price",
           price
+        );
+
+        formData.append(
+          "stock",
+          stock
         );
 
         formData.append(
@@ -589,6 +601,27 @@ function EditProduct() {
             rounded
           "
           placeholder="Price"
+          required
+        />
+
+
+        {/* ================= STOCK ================= */}
+
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={stock}
+          onChange={(e) =>
+            setStock(e.target.value)
+          }
+          className="
+            w-full
+            border
+            p-3
+            rounded
+          "
+          placeholder="Stock quantity"
           required
         />
 

@@ -142,6 +142,7 @@ import {
   fetchProfile,
   updateProfile,
 } from "../store/slices/userSlice";
+import Footer from "../components/Footer";
 
 function Profile() {
 
@@ -195,87 +196,88 @@ alert("Profile Updated Successfully");
   }
 
   return (
+    <>
+      <div className="min-h-screen bg-slate-50 px-4 py-10">
+        <div className="max-w-2xl mx-auto">
 
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
 
-        <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
-
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-10">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white text-2xl font-bold border-2 border-white/40">
-                {name ? name.charAt(0).toUpperCase() : "?"}
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  My Profile
-                </h1>
-                <p className="text-blue-100 text-sm mt-1">
-                  Manage your personal information
-                </p>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-10">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white text-2xl font-bold border-2 border-white/40">
+                  {name ? name.charAt(0).toUpperCase() : "?"}
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">
+                    My Profile
+                  </h1>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Manage your personal information
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="px-8 py-8 space-y-6"
+            >
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Name
+                </label>
+                <input
+                  value={name}
+                  onChange={(e) =>
+                    setName(e.target.value)
+                  }
+                  className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-800 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Email
+                </label>
+                <input
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                  className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-800 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Role
+                </label>
+                <input
+                  value={profile.role}
+                  disabled
+                  className="w-full border border-slate-200 rounded-lg px-4 py-3 bg-slate-100 text-slate-500 cursor-not-allowed"
+                />
+              </div>
+
+              <button
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-sm shadow-blue-600/30 transition-colors"
+              >
+                Save Changes
+              </button>
+
+            </form>
+
           </div>
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="px-8 py-8 space-y-6"
-          >
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Name
-              </label>
-              <input
-                value={name}
-                onChange={(e) =>
-                  setName(e.target.value)
-                }
-                className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-800 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Email
-              </label>
-              <input
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-800 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your email"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Role
-              </label>
-              <input
-                value={profile.role}
-                disabled
-                className="w-full border border-slate-200 rounded-lg px-4 py-3 bg-slate-100 text-slate-500 cursor-not-allowed"
-              />
-            </div>
-
-            <button
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-sm shadow-blue-600/30 transition-colors"
-            >
-              Save Changes
-            </button>
-
-          </form>
-
         </div>
-
       </div>
-    </div>
-
+      <Footer />
+    </>
   );
 
 }

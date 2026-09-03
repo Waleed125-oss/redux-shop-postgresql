@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchOrders } from "../store/slices/orderSlice";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { formatPrice } from "../services/currency";
 
 function Orders() {
@@ -81,6 +82,7 @@ function Orders() {
         )}
 
       </div>
+      <Footer />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { fetchMyInvoiceAPI } from "../services/api";
 
 const formatMoney = (amount, currency = "USD") =>
@@ -318,6 +319,7 @@ function MyInvoiceDetails() {
           </section>
         )}
       </main>
+      <Footer />
     </>
   );
 }

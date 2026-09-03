@@ -62,6 +62,7 @@ import {
   requestRefundAPI,
   getCustomerRefundRequestsAPI,
 } from "../services/api";
+import Footer from "../components/Footer";
 
 function MyOrders() {
   const dispatch = useDispatch();
@@ -141,122 +142,123 @@ function MyOrders() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 px-4">
+    <>
+      <div className="max-w-6xl mx-auto mt-10 px-4">
 
-      <h1 className="text-3xl font-bold mb-8">
-        My Orders
-      </h1>
+        <h1 className="text-3xl font-bold mb-8">
+          My Orders
+        </h1>
 
-      {/* SUCCESS MESSAGE */}
+        {/* SUCCESS MESSAGE */}
 
-      {refundSuccess && (
-        <div className="mb-5 p-4 rounded bg-green-100 text-green-700">
-          {refundSuccess}
-        </div>
-      )}
+        {refundSuccess && (
+          <div className="mb-5 p-4 rounded bg-green-100 text-green-700">
+            {refundSuccess}
+          </div>
+        )}
 
-      {/* ORDERS */}
+        {/* ORDERS */}
 
-      {orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        orders.map((order) => {
+        {orders.length === 0 ? (
+          <p>No orders found.</p>
+        ) : (
+          orders.map((order) => {
 
-          const canRequestRefund =
-            order.payment_status === "paid";
+            const canRequestRefund =
+              order.payment_status === "paid";
 
-          return (
-            <div
-              key={order.id}
-              className="border rounded-lg p-5 mb-5 shadow"
-            >
+            return (
+              <div
+                key={order.id}
+                className="border rounded-lg p-5 mb-5 shadow"
+              >
 
-              <h2 className="text-xl font-semibold">
-                Order #{order.id}
+                <h2 className="text-xl font-semibold">
+                  Order #{order.id}
+                </h2>
+
+                <p className="mt-2">
+                  Status: {order.status}
+                </p>
+
+                <p>
+                  Total: {formatPrice(order.total_amount)}
+                </p>
+
+                {refunds
+                  .filter((refund) => Number(refund.order_id) === Number(order.id))
+                  .map((refund) => (
+                    <div
+                      key={refund.id}
+                      className={`mt-3 p-3 rounded ${
+                        refund.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      Refund request: <strong className="capitalize">
+                        {refund.status}
+                      </strong>
+                      {refund.status === "approved" && (
+                        <span> - Payment refunded</span>
+                      )}
+                    </div>
+                  ))}
+
+                {/* REFUND BUTTON */}
+
+                {canRequestRefund && (
+                  <button
+                    onClick={() => openRefundModal(order)}
+                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Request Refund
+                  </button>
+                )}
+
+              </div>
+            );
+          })
+        )}
+
+        {/* REFUND MODAL */}
+
+        {refundOrder && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+
+              <h2 className="text-xl font-bold mb-4">
+                Request Refund
               </h2>
 
-              <p className="mt-2">
-                Status: {order.status}
+              <p className="mb-4 text-gray-600">
+                Order #{refundOrder.id}
               </p>
 
-              <p>
-                Total: {formatPrice(order.total_amount)}
-              </p>
+              <label className="block mb-2 font-medium">
+                Refund Reason
+              </label>
 
-              {refunds
-                .filter((refund) => Number(refund.order_id) === Number(order.id))
-                .map((refund) => (
-                  <div
-                    key={refund.id}
-                    className={`mt-3 p-3 rounded ${
-                      refund.status === "approved"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    Refund request: <strong className="capitalize">
-                      {refund.status}
-                    </strong>
-                    {refund.status === "approved" && (
-                      <span> - Payment refunded</span>
-                    )}
-                  </div>
-                ))}
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Enter the reason for requesting a refund..."
+                rows={4}
+                className="w-full border rounded-lg p-3 outline-none focus:ring-2"
+              />
 
-              {/* REFUND BUTTON */}
+              {/* ERROR */}
 
-              {canRequestRefund && (
-                <button
-                  onClick={() => openRefundModal(order)}
-                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                  Request Refund
-                </button>
+              {refundError && (
+                <p className="text-red-600 mt-2">
+                  {refundError}
+                </p>
               )}
 
-            </div>
-          );
-        })
-      )}
+              {/* BUTTONS */}
 
-      {/* REFUND MODAL */}
-
-      {refundOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-
-            <h2 className="text-xl font-bold mb-4">
-              Request Refund
-            </h2>
-
-            <p className="mb-4 text-gray-600">
-              Order #{refundOrder.id}
-            </p>
-
-            <label className="block mb-2 font-medium">
-              Refund Reason
-            </label>
-
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Enter the reason for requesting a refund..."
-              rows={4}
-              className="w-full border rounded-lg p-3 outline-none focus:ring-2"
-            />
-
-            {/* ERROR */}
-
-            {refundError && (
-              <p className="text-red-600 mt-2">
-                {refundError}
-              </p>
-            )}
-
-            {/* BUTTONS */}
-
-            <div className="flex justify-end gap-3 mt-5">
+              <div className="flex justify-end gap-3 mt-5">
 
               <button
                 onClick={closeRefundModal}

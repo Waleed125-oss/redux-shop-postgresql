@@ -580,6 +580,13 @@ const handlePermanentDelete = async (product) => {
 
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
 
+                  Stock
+
+                </th>
+
+
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+
                   Category
 
                 </th>
@@ -676,6 +683,19 @@ const handlePermanentDelete = async (product) => {
                       <span className="font-semibold text-gray-800">
 
                         {formatPrice(product.price)}
+
+                      </span>
+
+                    </td>
+
+
+                    {/* STOCK */}
+
+                    <td className="px-6 py-5">
+
+                      <span className="font-semibold text-gray-800">
+
+                        {product.stock}
 
                       </span>
 
