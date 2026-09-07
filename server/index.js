@@ -41,6 +41,12 @@ app.use(
 // ======================================================
 app.use(express.json());
 
+app.use("/", (req, res) => {
+  res.status(200).json({ message: "Server is running" });
+});
+app.use("/health", (req, res) => {
+  res.status(200).json({ message: "Server is healthy" });
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/seller", sellerRoutes);
@@ -54,12 +60,12 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/admin/customers", adminCustomerRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/refunds", refundRoutes);
-app.use("/api/stripe-connect",  stripeConnectRoutes);
+app.use("/api/stripe-connect", stripeConnectRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/ai-assistant", aiAssistantRoutes);
 app.use("/api/invoices", invoiceRoutes);
- 
- 
+
+
 
 
 app.get("/", (req, res) => {
