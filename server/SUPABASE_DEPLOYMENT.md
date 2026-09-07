@@ -20,8 +20,6 @@ In the Vercel project for the `server` directory, add these for **Production**,
 
 ```text
 DATABASE_URL=<Supabase Session pooler connection string>
-DB_POOL_MAX=1
-DB_SSL=true
 ```
 
 Copy the Session pooler URI from Supabase's **Connect** panel. Do not commit it
@@ -38,6 +36,6 @@ Redeploy the server project, then request `GET /health` and perform an API
 request that reads the database. A successful `/health` response only proves
 the function is running; a database-backed endpoint confirms the connection.
 
-For local development, set `DATABASE_URL` to the Supabase URI, or leave it
-empty and use the legacy `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and
-`DB_PASSWORD` variables. Set `DB_SSL=false` only for a non-TLS local database.
+For local development, set `DATABASE_URL` to the Supabase URI as well. The
+server requires this connection string and uses a small TLS-enabled pool for
+serverless compatibility.
