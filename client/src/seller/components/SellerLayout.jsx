@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import SellerSidebar from './SellerSIdebar';
+import SellerSidebar from './SellerSidebar';
 import SellerTopbar from "./SellerTopbar";
 
 function SellerLayout() {
