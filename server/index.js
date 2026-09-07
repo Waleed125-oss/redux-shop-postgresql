@@ -41,11 +41,11 @@ app.use(
 // ======================================================
 app.use(express.json());
 
-app.use("/", (req, res) => {
+app.get("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
 
-app.use("/health", (req, res) => {
+app.get("/health", (req, res) => {
   res.status(200).json({ message: "Server is healthy" });
 });
 app.use("/api/auth", authRoutes);
@@ -68,10 +68,6 @@ app.use("/api/invoices", invoiceRoutes);
 
 
 
-
-app.get("/", (req, res) => {
-  res.send("Redux Shop PostgreSQL Backend Running...");
-});
 
 const PORT = process.env.PORT || 5000;
 
