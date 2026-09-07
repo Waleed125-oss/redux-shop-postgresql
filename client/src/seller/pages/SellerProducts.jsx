@@ -183,7 +183,7 @@ function SellerProducts() {
                           src={
                             product.image.startsWith("http")
                               ? product.image
-                              : `http://localhost:5000${product.image}`
+                              : `${import.meta.env.VITE_API_URL}${product.image}`
                           }
                           alt={product.title}
                           className="w-12 h-12 object-cover rounded-lg"

@@ -31,7 +31,7 @@ function AdminAiProduct() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/ai/generate-product",
+        `${import.meta.env.VITE_API_URL}/api/ai/generate-product`,
         {
           method: "POST",
           headers: {
@@ -92,7 +92,7 @@ function AdminAiProduct() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/ai/generate-image",
+        `${import.meta.env.VITE_API_URL}/api/ai/generate-image`,
         {
           method: "POST",
           headers: {

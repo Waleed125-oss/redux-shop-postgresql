@@ -27,7 +27,7 @@ function ProductCard({ product }) {
 />
 
  {/* <img
-  src={`http://localhost:5000${product.image}`}
+  src={`${import.meta.env.VITE_API_URL}${product.image}`}
   alt={product.title}
   className="h-52 w-full object-contain"
   onError={(e) => {

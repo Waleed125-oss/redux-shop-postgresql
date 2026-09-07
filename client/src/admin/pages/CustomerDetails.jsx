@@ -37,7 +37,7 @@ function CustomerDetails() {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          `http://localhost:5000/api/admin/customers/${id}`,
+          `${import.meta.env.VITE_API_URL}/api/admin/customers/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

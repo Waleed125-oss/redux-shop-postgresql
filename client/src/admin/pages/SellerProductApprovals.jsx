@@ -196,7 +196,7 @@ function SellerProductApprovals() {
 
                       {product.image ? (
                         <img
-                          src={`http://localhost:5000${product.image}`}
+                          src={`${import.meta.env.VITE_API_URL}${product.image}`}
                           alt={product.title}
                           className="w-14 h-14 object-cover rounded-lg"
                         />

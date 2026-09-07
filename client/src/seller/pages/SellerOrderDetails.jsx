@@ -887,7 +887,7 @@ function SellerOrderDetails() {
                               "http"
                             )
                               ? item.productImage
-                              : `http://localhost:5000${item.productImage}`
+                              : `${import.meta.env.VITE_API_URL}${item.productImage}`
                           }
                           alt={
                             item.productTitle

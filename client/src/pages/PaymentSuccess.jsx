@@ -27,7 +27,7 @@ const PaymentSuccess = () => {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-          `http://localhost:5000/api/payment/verify-session/${sessionId}`,
+          `${import.meta.env.VITE_API_URL}/api/payment/verify-session/${sessionId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
