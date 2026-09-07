@@ -44,6 +44,7 @@ app.use(express.json());
 app.use("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
+
 app.use("/health", (req, res) => {
   res.status(200).json({ message: "Server is healthy" });
 });
