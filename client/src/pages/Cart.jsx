@@ -1,4 +1,4 @@
-const IMAGE_URL = import.meta.env.VITE_API_URL;
+import { getImageUrl } from "../services/images";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -87,7 +87,7 @@ function Cart() {
                 >
 
                   <img
-                    src={`${IMAGE_URL}${item.image}`}
+                    src={getImageUrl(item.image)}
                     alt={item.title}
                     className="h-28 w-28 rounded-xl bg-slate-50 object-contain p-2"
                   />

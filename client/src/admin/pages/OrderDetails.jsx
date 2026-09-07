@@ -7,6 +7,7 @@ import {
   updateOrderStatus,
 } from "../../store/slices/orderSlice";
 import { formatPrice } from "../../services/currency";
+import { getImageUrl } from "../../services/images";
 
 function OrderDetails() {
 
@@ -89,9 +90,7 @@ function OrderDetails() {
                   
                  <img
   src={
-    item.image.startsWith("http")
-      ? item.image
-      : `${import.meta.env.VITE_API_URL}${item.image}`
+    getImageUrl(item.image)
   }
   alt={item.title}
   className="w-16 h-16 object-contain"

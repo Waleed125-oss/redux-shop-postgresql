@@ -180,7 +180,11 @@ function SellerProducts() {
 
                       {product.image && (
                         <img
-                          src={`http://localhost:5000${product.image}`}
+                          src={
+                            product.image.startsWith("http")
+                              ? product.image
+                              : `http://localhost:5000${product.image}`
+                          }
                           alt={product.title}
                           className="w-12 h-12 object-cover rounded-lg"
                         />

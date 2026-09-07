@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { formatPrice } from "../services/currency";
 import { requestRefundAPI } from "../services/api";
+import { getImageUrl } from "../services/images";
 
 function MyOrderDetails() {
 
@@ -350,10 +351,7 @@ const [refundSuccess, setRefundSuccess] = useState("");
 
                       <img
                         src={
-                          item.image &&
-                          item.image.startsWith("http")
-                            ? item.image
-                            : `${import.meta.env.VITE_API_URL}${item.image}`
+                          getImageUrl(item.image)
                         }
                         alt={item.title}
                         className="

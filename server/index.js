@@ -23,9 +23,6 @@ const aiRoutes = require("./routes/aiRoutes");
 const aiAssistantRoutes = require("./routes/aiAssistantRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
 
-const path = require("path");
-
-
 const app = express();
 
 app.use(cors());
@@ -65,11 +62,6 @@ app.use("/api/invoices", invoiceRoutes);
  
 
 
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads"))
-);
-
 app.get("/", (req, res) => {
   res.send("Redux Shop PostgreSQL Backend Running...");
 });
@@ -94,4 +86,8 @@ async function startServer() {
 }
 
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;

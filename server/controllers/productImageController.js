@@ -1,6 +1,5 @@
 const pool = require("../config/db");
-const fs = require("fs");
-const path = require("path");
+const { deleteImage } = require("../services/cloudinaryService");
 
 const deleteProductImage = async (req, res) => {
   try {
@@ -24,18 +23,7 @@ const deleteProductImage = async (req, res) => {
 
     const image = result.rows[0];
 
-    // Delete image file from uploads folder
-    if (image.image) {
-      const imagePath = path.join(
-        __dirname,
-        "..",
-        image.image
-      );
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
-    }
+    await deleteImage(image.image);
 
     // Delete image from database
     await pool.query(

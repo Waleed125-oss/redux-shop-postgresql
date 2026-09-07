@@ -5,6 +5,7 @@ const {
   toVectorLiteral,
   updateProductEmbedding,
 } = require("../services/ai/embeddingService");
+const { uploadImage } = require("../services/cloudinaryService");
 
 
 
@@ -700,13 +701,14 @@ const createProduct = async (req, res) => {
     const mainImageFile = req.files?.image?.[0];
 
     const mainImage = mainImageFile
-      ? `/uploads/${mainImageFile.filename}`
+      ? await uploadImage(mainImageFile)
       : null;
 
 
     // ================= GALLERY IMAGES =================
 
     const galleryImages = req.files?.images || [];
+    const uploadedGalleryImages = [];
 
 
     // ================= VALIDATION =================
@@ -806,6 +808,8 @@ if (
     // ================= INSERT GALLERY IMAGES =================
 
     for (const file of galleryImages) {
+      const uploadedImage = await uploadImage(file);
+      uploadedGalleryImages.push(uploadedImage);
 
       await pool.query(
         `
@@ -820,7 +824,7 @@ if (
         `,
         [
           product.id,
-          `/uploads/${file.filename}`,
+          uploadedImage,
         ]
       );
 
@@ -840,10 +844,7 @@ if (
 
     res.status(201).json({
       ...product,
-      images: galleryImages.map(
-        (file) =>
-          `/uploads/${file.filename}`
-      ),
+      images: uploadedGalleryImages,
     });
 
 
@@ -884,7 +885,7 @@ const createSellerProduct = async (req, res) => {
     const mainImageFile = req.files?.image?.[0];
 
     const mainImage = mainImageFile
-      ? `/uploads/${mainImageFile.filename}`
+      ? await uploadImage(mainImageFile)
       : null;
 
     // ================= GALLERY IMAGES =================
@@ -1012,7 +1013,7 @@ if (
         `,
         [
           product.id,
-          `/uploads/${file.filename}`,
+          await uploadImage(file),
         ]
       );
     }
@@ -1445,7 +1446,7 @@ const updateProduct = async (req, res) => {
     const mainImageFile = req.files?.image?.[0];
 
     const imagePath = mainImageFile
-      ? `/uploads/${mainImageFile.filename}`
+      ? await uploadImage(mainImageFile)
       : null;
 
 
@@ -1558,7 +1559,7 @@ const updateProduct = async (req, res) => {
         `,
         [
           product.id,
-          `/uploads/${file.filename}`,
+          await uploadImage(file),
         ]
       );
 

@@ -15,6 +15,7 @@ import {
 
 import { fetchCategories } from "../../store/slices/categorySlice";
 import { formatPrice } from "../../services/currency";
+import { getImageUrl } from "../../services/images";
 
 import { Link, useLocation } from "react-router-dom";
 
@@ -646,7 +647,7 @@ const handlePermanentDelete = async (product) => {
                       >
 
                         <img
-                          src={`${import.meta.env.VITE_API_URL}${product.image}`}
+                          src={getImageUrl(product.image)}
                           alt={product.title}
                           className="w-full h-full object-contain"
                         />

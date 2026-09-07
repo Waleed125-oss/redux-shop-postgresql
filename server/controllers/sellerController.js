@@ -2,6 +2,7 @@ const pool = require("../config/db");
 const {
   updateProductEmbedding,
 } = require("../services/ai/embeddingService");
+const { uploadImage, deleteImage } = require("../services/cloudinaryService");
 
 // ========================================
 // Apply to become a seller
@@ -229,7 +230,7 @@ const createSellerProduct = async (req, res) => {
     const mainImageFile = req.files?.image?.[0];
 
     const mainImage = mainImageFile
-      ? `/uploads/${mainImageFile.filename}`
+      ? await uploadImage(mainImageFile)
       : null;
 
     if (!mainImage) {
@@ -306,7 +307,7 @@ const createSellerProduct = async (req, res) => {
         `,
         [
           product.id,
-          `/uploads/${file.filename}`,
+          await uploadImage(file),
         ]
       );
     }
@@ -555,7 +556,8 @@ const updateSellerProduct = async (req, res) => {
     let updatedImage = product.image;
 
     if (req.file) {
-      updatedImage = `/uploads/${req.file.filename}`;
+      updatedImage = await uploadImage(req.file);
+      await deleteImage(product.image);
     }
 
     // Update product

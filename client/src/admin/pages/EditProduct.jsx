@@ -150,6 +150,7 @@ import {
 import {
   deleteProductImageAPI,
 } from "../../services/api";
+import { getImageUrl } from "../../services/images";
 
 
 function EditProduct() {
@@ -471,9 +472,7 @@ function EditProduct() {
           {oldImage && (
 
             <img
-              src={`${
-                import.meta.env.VITE_API_URL
-              }${oldImage}`}
+              src={getImageUrl(oldImage)}
               alt="Product"
               className="
                 w-48
@@ -518,9 +517,7 @@ function EditProduct() {
                   >
 
                     <img
-                      src={`${
-                        import.meta.env.VITE_API_URL
-                      }${item.image}`}
+                      src={getImageUrl(item.image)}
                       alt="Gallery"
                       className="
                         w-full

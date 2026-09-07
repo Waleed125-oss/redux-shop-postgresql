@@ -10,6 +10,7 @@ import {
   fetchProductRecommendations,
 } from "../store/slices/productSlice";
 import { formatPrice } from "../services/currency";
+import { getImageUrl } from "../services/images";
 
 function ProductDetails() {
 
@@ -70,9 +71,7 @@ function ProductDetails() {
 
   // ================= MAIN IMAGE =================
 
-  const mainImage = product.image
-    ? `${import.meta.env.VITE_API_URL}${product.image}`
-    : null;
+  const mainImage = product.image ? getImageUrl(product.image) : null;
 
 
   // ================= GALLERY IMAGES =================
@@ -95,8 +94,7 @@ function ProductDetails() {
 
     ...galleryImages.map((item) => ({
       id: item.id,
-      image:
-        `${import.meta.env.VITE_API_URL}${item.image}`,
+      image: getImageUrl(item.image),
     })),
 
   ];

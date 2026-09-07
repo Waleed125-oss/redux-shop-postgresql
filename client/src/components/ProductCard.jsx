@@ -1,4 +1,4 @@
-const IMAGE_URL = import.meta.env.VITE_API_URL;
+import { getImageUrl } from "../services/images";
 
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
@@ -21,7 +21,7 @@ function ProductCard({ product }) {
     <div className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-300/60">
 
    <img
-  src={`${IMAGE_URL}${product.image}`}
+  src={getImageUrl(product.image)}
   alt={product.title}
   className="h-52 w-full rounded-xl bg-slate-50 object-contain p-3 transition duration-300 group-hover:scale-[1.02]"
 />
