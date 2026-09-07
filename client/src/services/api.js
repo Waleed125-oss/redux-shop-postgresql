@@ -13,6 +13,26 @@ const getJsonAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
+// ================= AI SHOPPING ASSISTANT =================
+
+export const chatWithShoppingAssistantAPI = async (message) => {
+  const response = await fetch(`${BASE_URL}/ai-assistant/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "The shopping assistant is temporarily unavailable."
+    );
+  }
+
+  return data;
+};
+
 
 
 
@@ -200,6 +220,31 @@ export const fetchSingleProductAPI = async (
     throw new Error(
       error?.message ||
       "Failed to fetch product"
+    );
+  }
+
+  return response.json();
+};
+
+// GET PRODUCT RECOMMENDATIONS
+
+export const fetchProductRecommendationsAPI = async (
+  id,
+  limit = 4
+) => {
+
+  const response = await fetch(
+    `${BASE_URL}/products/${id}/recommendations?limit=${limit}`
+  );
+
+  if (!response.ok) {
+
+    const error =
+      await response.json().catch(() => null);
+
+    throw new Error(
+      error?.message ||
+      "Failed to fetch product recommendations"
     );
   }
 

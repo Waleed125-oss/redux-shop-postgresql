@@ -1,4 +1,7 @@
 const pool = require("../config/db");
+const {
+  updateProductEmbedding,
+} = require("../services/ai/embeddingService");
 
 // ========================================
 // Apply to become a seller
@@ -325,6 +328,15 @@ const createSellerProduct = async (req, res) => {
       [product.id]
     );
 
+    try {
+      await updateProductEmbedding(product);
+    } catch (embeddingError) {
+      console.error(
+        "Product embedding generation failed:",
+        embeddingError.message
+      );
+    }
+
     // ================= RESPONSE =================
 
     res.status(201).json({
@@ -576,6 +588,15 @@ const updateSellerProduct = async (req, res) => {
     sellerId,
   ]
 );
+
+    try {
+      await updateProductEmbedding(result.rows[0]);
+    } catch (embeddingError) {
+      console.error(
+        "Product embedding generation failed:",
+        embeddingError.message
+      );
+    }
 
     res.json({
       message:

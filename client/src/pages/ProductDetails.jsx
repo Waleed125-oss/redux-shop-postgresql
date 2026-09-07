@@ -3,8 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
 import Navbar from "../components/Navbar";
+import ProductCard from "../components/ProductCard";
 import { addToCart } from "../store/slices/cartSlice";
-import { fetchSingleProduct } from "../store/slices/productSlice";
+import {
+  fetchSingleProduct,
+  fetchProductRecommendations,
+} from "../store/slices/productSlice";
 import { formatPrice } from "../services/currency";
 
 function ProductDetails() {
@@ -23,6 +27,10 @@ function ProductDetails() {
     (state) => state.products.selectedProduct
   );
 
+  const recommendations = useSelector(
+    (state) => state.products.recommendations
+  );
+
 
   // ================= FETCH PRODUCT =================
 
@@ -30,6 +38,10 @@ function ProductDetails() {
 
     dispatch(
       fetchSingleProduct(id)
+    );
+
+    dispatch(
+      fetchProductRecommendations(id)
     );
 
   }, [dispatch, id]);
@@ -371,6 +383,31 @@ function ProductDetails() {
           </div>
 
         </div>
+
+        {recommendations.length > 0 && (
+
+          <section className="mt-16">
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              You may also like
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+              {recommendations.map((recommendedProduct) => (
+
+                <ProductCard
+                  key={recommendedProduct.id}
+                  product={recommendedProduct}
+                />
+
+              ))}
+
+            </div>
+
+          </section>
+
+        )}
 
       </div>
 

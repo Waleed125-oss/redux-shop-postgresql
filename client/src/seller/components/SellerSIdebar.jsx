@@ -4,7 +4,6 @@
 //   FaChartBar,
 //   FaBox,
 //   FaClipboardList,
-//   FaCog,
 //   FaUndo,
 // } from "react-icons/fa";
 
@@ -31,11 +30,6 @@
 //   icon: <FaUndo />,
 //   path: "/seller/refunds",
 // },
-//     {
-//       name: "Settings",
-//       path: "/seller/settings",
-//       icon: <FaCog />,
-//     },
 //   ];
 
 //   return (
@@ -146,7 +140,6 @@ import {
   FaChartBar,
   FaBox,
   FaClipboardList,
-  FaCog,
   FaUndo,
   FaCreditCard,
   FaFileInvoiceDollar,
@@ -183,11 +176,6 @@ function SellerSidebar() {
       name: "Stripe Account",
       path: "/seller/stripe-connect",
       icon: <FaCreditCard />,
-    },
-    {
-      name: "Settings",
-      path: "/seller/settings",
-      icon: <FaCog />,
     },
   ];
 

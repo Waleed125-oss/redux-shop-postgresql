@@ -1,5 +1,10 @@
 
 const pool = require("../config/db");
+const {
+  generateEmbedding,
+  toVectorLiteral,
+  updateProductEmbedding,
+} = require("../services/ai/embeddingService");
 
 
 
@@ -324,6 +329,124 @@ const getProducts = async (req, res) => {
 
     });
 
+  }
+};
+
+// ================= AI SEMANTIC SEARCH =================
+
+const aiSearchProducts = async (req, res) => {
+  try {
+    const query = req.query.q?.trim();
+
+    if (!query) {
+      return res.status(400).json({
+        message: "Search query is required",
+      });
+    }
+
+    const requestedLimit = Number(req.query.limit) || 12;
+    const limit = Math.min(Math.max(requestedLimit, 1), 50);
+
+    const embedding = await generateEmbedding(query);
+
+    const result = await pool.query(
+      `
+      SELECT
+        p.id,
+        p.title,
+        p.price,
+        p.description,
+        p.category_id,
+        p.image,
+        p.rating,
+        p.stock,
+        p.is_active,
+        p.approval_status,
+        p.seller_id,
+        c.name AS category,
+        1 - (p.embedding <=> $1::vector) AS similarity
+      FROM products p
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+      WHERE
+        p.embedding IS NOT NULL
+        AND p.is_active = TRUE
+        AND p.approval_status = 'approved'
+        AND p.stock > 0
+      ORDER BY p.embedding <=> $1::vector
+      LIMIT $2
+      `,
+      [toVectorLiteral(embedding), limit]
+    );
+
+    return res.json({
+      products: result.rows,
+    });
+
+  } catch (error) {
+    console.error("AI product search error:", error.message);
+
+    return res.status(502).json({
+      message: "AI product search is temporarily unavailable",
+    });
+  }
+};
+
+// ================= PRODUCT RECOMMENDATIONS =================
+
+const getProductRecommendations = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const requestedLimit = Number(req.query.limit) || 4;
+    const limit = Math.min(Math.max(requestedLimit, 1), 12);
+
+    const result = await pool.query(
+      `
+      SELECT
+        p.id,
+        p.title,
+        p.price,
+        p.description,
+        p.category_id,
+        p.image,
+        p.rating,
+        p.stock,
+        p.is_active,
+        p.approval_status,
+        p.seller_id,
+        c.name AS category,
+        1 - (p.embedding <=> source.embedding) AS similarity
+      FROM products source
+      INNER JOIN products p
+        ON p.id <> source.id
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+      WHERE
+        source.id = $1
+        AND source.embedding IS NOT NULL
+        AND p.embedding IS NOT NULL
+        AND p.is_active = TRUE
+        AND p.approval_status = 'approved'
+        AND p.stock > 0
+      ORDER BY p.embedding <=> source.embedding
+      LIMIT $2
+      `,
+      [id, limit]
+    );
+
+    return res.json({
+      products: result.rows,
+    });
+
+  } catch (error) {
+    console.error(
+      "Product recommendations error:",
+      error.message
+    );
+
+    return res.status(500).json({
+      message: "Unable to load product recommendations",
+    });
   }
 };
 
@@ -703,6 +826,15 @@ if (
 
     }
 
+    try {
+      await updateProductEmbedding(product);
+    } catch (embeddingError) {
+      console.error(
+        "Product embedding generation failed:",
+        embeddingError.message
+      );
+    }
+
 
     // ================= RESPONSE =================
 
@@ -901,6 +1033,15 @@ if (
       `,
       [product.id]
     );
+
+    try {
+      await updateProductEmbedding(product);
+    } catch (embeddingError) {
+      console.error(
+        "Product embedding generation failed:",
+        embeddingError.message
+      );
+    }
 
     // ================= RESPONSE =================
 
@@ -1279,98 +1420,9 @@ const rejectSellerProduct = async (req, res) => {
     });
   }
 };
-// ================= UPDATE PRODUCT =================
 
-// const updateProduct = async (req, res) => {
-//   try {
-//     const { id } = req.params;
 
-//     const {
-//       title,
-//       price,
-//       description,
-//       category_id,
-//       rating,
-//     } = req.body;
 
-//     let imagePath = null;
-
-//     if (req.file) {
-//       imagePath = `/uploads/${req.file.filename}`;
-//     }
-
-//     if (!title || title.trim() === "") {
-//       return res.status(400).json({
-//         message: "Title is required",
-//       });
-//     }
-
-//     if (price <= 0) {
-//       return res.status(400).json({
-//         message: "Price must be greater than 0",
-//       });
-//     }
-
-//     if (!description || description.trim() === "") {
-//       return res.status(400).json({
-//         message: "Description is required",
-//       });
-//     }
-
-//     if (!category_id) {
-//       return res.status(400).json({
-//         message: "Category is required",
-//       });
-//     }
-
-//     if (rating < 0 || rating > 5) {
-//       return res.status(400).json({
-//         message: "Rating must be between 0 and 5",
-//       });
-//     }
-
-//     const result = await pool.query(
-//       `
-//       UPDATE products
-
-//       SET
-//         title = $1,
-//         price = $2,
-//         description = $3,
-//         category_id = $4,
-//         image = COALESCE($5, image),
-//         rating = $6
-
-//       WHERE id = $7
-
-//       RETURNING *
-//       `,
-//       [
-//         title,
-//         price,
-//         description,
-//         category_id,
-//         imagePath,
-//         rating,
-//         id,
-//       ]
-//     );
-
-//     if (result.rows.length === 0) {
-//       return res.status(404).json({
-//         message: "Product not found",
-//       });
-//     }
-
-//     res.json(result.rows[0]);
-//   } catch (error) {
-//     console.error(error);
-
-//     res.status(500).json({
-//       message: "Server Error",
-//     });
-//   }
-// };
 
 
 // ================= UPDATE PRODUCT =================
@@ -1529,6 +1581,15 @@ const updateProduct = async (req, res) => {
       `,
       [id]
     );
+
+    try {
+      await updateProductEmbedding(product);
+    } catch (embeddingError) {
+      console.error(
+        "Product embedding generation failed:",
+        embeddingError.message
+      );
+    }
 
 
     // ================= RESPONSE =================
@@ -1757,6 +1818,8 @@ const permanentlyDeleteProduct = async (req, res) => {
 
 module.exports = {
   getProducts,
+  aiSearchProducts,
+  getProductRecommendations,
   getHomeProductSections,
   getSingleProduct,
   createProduct,

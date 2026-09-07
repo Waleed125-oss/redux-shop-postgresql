@@ -6,7 +6,6 @@ import {
   FaClipboardList,
   FaTags,
   FaUsers,
-  FaCog,
   FaStore,
   FaCheckCircle,
   FaArrowLeft,
@@ -59,11 +58,6 @@ function Sidebar() {
   icon: <FaUndo />,
   path: "/admin/refunds",
 },
-    {
-      name: "Settings",
-      icon: <FaCog />,
-      path: "/admin/settings",
-    },
   ];
 
   const sellerMenu = [

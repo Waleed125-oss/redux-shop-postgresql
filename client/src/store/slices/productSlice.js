@@ -7,6 +7,7 @@ import {
   permanentlyDeleteProductAPI,
   createProductAPI,
   fetchSingleProductAPI,
+  fetchProductRecommendationsAPI,
   updateProductAPI,
   toggleProductStatusAPI,
   fetchHomeSectionsAPI,
@@ -181,6 +182,17 @@ export const fetchSingleProduct = createAsyncThunk(
   }
 );
 
+// ================= PRODUCT RECOMMENDATIONS =================
+
+export const fetchProductRecommendations = createAsyncThunk(
+  "products/fetchProductRecommendations",
+
+  async (id) => {
+
+    return await fetchProductRecommendationsAPI(id);
+  }
+);
+
 
 // ================= UPDATE PRODUCT =================
 
@@ -214,6 +226,10 @@ const initialState = {
   products: [],
 
   selectedProduct: null,
+
+  recommendations: [],
+
+  recommendationsLoading: false,
 
   currentPage: 1,
 
@@ -403,6 +419,39 @@ const productSlice = createSlice({
 
           state.selectedProduct =
             action.payload;
+
+        }
+      )
+
+      // ================= RECOMMENDATIONS =================
+
+      .addCase(
+        fetchProductRecommendations.pending,
+        (state) => {
+
+          state.recommendationsLoading = true;
+          state.recommendations = [];
+
+        }
+      )
+
+      .addCase(
+        fetchProductRecommendations.fulfilled,
+        (state, action) => {
+
+          state.recommendationsLoading = false;
+          state.recommendations =
+            action.payload.products || [];
+
+        }
+      )
+
+      .addCase(
+        fetchProductRecommendations.rejected,
+        (state) => {
+
+          state.recommendationsLoading = false;
+          state.recommendations = [];
 
         }
       )

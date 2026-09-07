@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import { fetchCart } from "./store/slices/cartSlice";
+import ShoppingAssistant from "./components/ShoppingAssistant";
 
 // Customer Pages
 // Customer Pages
@@ -83,6 +84,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ShoppingAssistant />
       <Routes>
 
         {/* ================= CUSTOMER ROUTES ================= */}
@@ -394,17 +396,6 @@ function App() {
     element={<SellerInvoiceDetails />}
   />
 
-
-
-  {/* Seller Settings */}
-  <Route
-    path="settings"
-    element={
-      <div>
-        Seller Settings
-      </div>
-    }
-  />
 </Route>
 
       </Routes>

@@ -15,6 +15,8 @@ const upload = require("../middleware/upload");
 
 const {
   getProducts,
+  aiSearchProducts,
+  getProductRecommendations,
   getHomeProductSections,
   getSingleProduct,
   createProduct,
@@ -34,6 +36,10 @@ const {
 
 // User + Admin
 router.get("/", getProducts);
+
+// AI SEMANTIC PRODUCT SEARCH
+// Must stay before /:id so Express does not treat "ai-search" as an ID.
+router.get("/ai-search", aiSearchProducts);
 
 
 // HOME PRODUCT SECTIONS
@@ -78,6 +84,9 @@ router.patch(
 );
 
 // ================= GET SINGLE PRODUCT =================
+
+// Must stay before /:id so Express does not treat "recommendations" as an ID.
+router.get("/:id/recommendations", getProductRecommendations);
 
 // User + Admin
 router.get("/:id", getSingleProduct);
