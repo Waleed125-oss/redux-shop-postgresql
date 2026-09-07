@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict L5WaVrSlExZicPhGIooWATNfYwhu6LD39W6vxhNYyLQrbdr4nRUpGwf7bmPchLJ
+\restrict bl40hXYhhAqgN8mH1mNSf3qjIIuma1648inbyEDr9X6UFEVUBTcdbLFqukz4UvD
 
 -- Dumped from database version 18.4
 -- Dumped by pg_dump version 18.4
@@ -1485,5 +1485,5 @@ ALTER TABLE ONLY public.seller_applications
 -- PostgreSQL database dump complete
 --
 
-\unrestrict L5WaVrSlExZicPhGIooWATNfYwhu6LD39W6vxhNYyLQrbdr4nRUpGwf7bmPchLJ
+\unrestrict bl40hXYhhAqgN8mH1mNSf3qjIIuma1648inbyEDr9X6UFEVUBTcdbLFqukz4UvD
 
