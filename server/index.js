@@ -25,7 +25,23 @@ const invoiceRoutes = require("./routes/invoiceRoutes");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origin is not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 // ======================================================
 // STRIPE WEBHOOK
