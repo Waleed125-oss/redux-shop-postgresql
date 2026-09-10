@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   BrowserRouter,
@@ -11,42 +11,41 @@ import ShoppingAssistant from "./components/ShoppingAssistant";
 
 // Customer Pages
 // Customer Pages
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ProductDetails from "./pages/ProductDetails";
-import Cart from "./pages/Cart";
-import Profile from "./pages/Profile";
-import CustomerOrders from "./pages/Orders";
-import Inventory from "./pages/Inventory";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import BecomeSeller from "./pages/BecomeSeller";
-import ShopBySeller from "./pages/ShopBySeller";
-import SellerStore from "./pages/SellerStore";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import MyInvoices from "./pages/MyInvoices";
-import MyInvoiceDetails from "./pages/MyInvoiceDetails";
+const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ProductDetails = lazy(() => import("./pages/ProductDetails"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Profile = lazy(() => import("./pages/Profile"));
+const CustomerOrders = lazy(() => import("./pages/Orders"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const BecomeSeller = lazy(() => import("./pages/BecomeSeller"));
+const ShopBySeller = lazy(() => import("./pages/ShopBySeller"));
+const SellerStore = lazy(() => import("./pages/SellerStore"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const MyInvoices = lazy(() => import("./pages/MyInvoices"));
+const MyInvoiceDetails = lazy(() => import("./pages/MyInvoiceDetails"));
 
 
 // Admin Pages
-import AdminLayout from "./admin/components/AdminLayout";
-import SellerApplications from "./admin/pages/SellerApplications";
-import Dashboard from "./admin/pages/Dashboard";
-import Products from "./admin/pages/Products";
-import AddProduct from "./admin/pages/AddProduct";
-import EditProduct from "./admin/pages/EditProduct";
-import AdminOrders from "./admin/pages/Orders";
-import OrderDetails from "./admin/pages/OrderDetails";
-import Categories from "./admin/pages/Categories";
-import Customers from "./admin/pages/Customers";
-import CustomerDetails from "./admin/pages/CustomerDetails";
-import AdminRefundRequests from "./admin/pages/RefundRequests";
-import AdminAiProduct from "./admin/pages/AdminAiProduct";
-import AdminInvoices from "./admin/pages/Invoices";
-import AdminInvoiceDetails from "./admin/pages/InvoiceDetails";
-
-import MyOrderDetails from "./pages/MyOrderDetails";
+const AdminLayout = lazy(() => import("./admin/components/AdminLayout"));
+const SellerApplications = lazy(() => import("./admin/pages/SellerApplications"));
+const Dashboard = lazy(() => import("./admin/pages/Dashboard"));
+const Products = lazy(() => import("./admin/pages/Products"));
+const AddProduct = lazy(() => import("./admin/pages/AddProduct"));
+const EditProduct = lazy(() => import("./admin/pages/EditProduct"));
+const AdminOrders = lazy(() => import("./admin/pages/Orders"));
+const OrderDetails = lazy(() => import("./admin/pages/OrderDetails"));
+const Categories = lazy(() => import("./admin/pages/Categories"));
+const Customers = lazy(() => import("./admin/pages/Customers"));
+const CustomerDetails = lazy(() => import("./admin/pages/CustomerDetails"));
+const AdminRefundRequests = lazy(() => import("./admin/pages/RefundRequests"));
+const AdminAiProduct = lazy(() => import("./admin/pages/AdminAiProduct"));
+const AdminInvoices = lazy(() => import("./admin/pages/Invoices"));
+const AdminInvoiceDetails = lazy(() => import("./admin/pages/InvoiceDetails"));
+const MyOrderDetails = lazy(() => import("./pages/MyOrderDetails"));
 
 
 
@@ -55,22 +54,22 @@ import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import SellerRoute from "./components/SellerRoute";
 
-import SellerLayout from "./seller/components/SellerLayout";
-import SellerDashboard from "./seller/pages/Dashboard";
-import SellerProducts from "./seller/pages/SellerProducts";
-import SellerAddProduct from "./seller/pages/SellerAddProduct";
-import SellerOrders from "./seller/pages/SellerOrders";
-import SellerOrderDetails from "./seller/pages/SellerOrderDetails";
-import SellerProductApprovals from "./admin/pages/SellerProductApprovals";
-import SellerEditProduct from "./seller/pages/SellerEditProduct";
-import SellerRefundRequests from "./seller/pages/RefundRequests";
-import SellerList from "./admin/pages/SellerList";
-import SellerDetails from "./admin/pages/SellerDetails";
-import SellerStripeConnect from "./seller/pages/SellerStripeConnect";
-import SellerStripeOnboardingComplete from "./seller/pages/SellerStripeOnboardingComplete";
-import SellerAiProduct from "./seller/pages/SellerAIProduct";
-import SellerInvoices from "./seller/pages/SellerInvoices";
-import SellerInvoiceDetails from "./seller/pages/SellerInvoiceDetails";
+const SellerLayout = lazy(() => import("./seller/components/SellerLayout"));
+const SellerDashboard = lazy(() => import("./seller/pages/Dashboard"));
+const SellerProducts = lazy(() => import("./seller/pages/SellerProducts"));
+const SellerAddProduct = lazy(() => import("./seller/pages/SellerAddProduct"));
+const SellerOrders = lazy(() => import("./seller/pages/SellerOrders"));
+const SellerOrderDetails = lazy(() => import("./seller/pages/SellerOrderDetails"));
+const SellerProductApprovals = lazy(() => import("./admin/pages/SellerProductApprovals"));
+const SellerEditProduct = lazy(() => import("./seller/pages/SellerEditProduct"));
+const SellerRefundRequests = lazy(() => import("./seller/pages/RefundRequests"));
+const SellerList = lazy(() => import("./admin/pages/SellerList"));
+const SellerDetails = lazy(() => import("./admin/pages/SellerDetails"));
+const SellerStripeConnect = lazy(() => import("./seller/pages/SellerStripeConnect"));
+const SellerStripeOnboardingComplete = lazy(() => import("./seller/pages/SellerStripeOnboardingComplete"));
+const SellerAiProduct = lazy(() => import("./seller/pages/SellerAIProduct"));
+const SellerInvoices = lazy(() => import("./seller/pages/SellerInvoices"));
+const SellerInvoiceDetails = lazy(() => import("./seller/pages/SellerInvoiceDetails"));
 
 
 function App() {
@@ -85,7 +84,14 @@ function App() {
   return (
     <BrowserRouter>
       <ShoppingAssistant />
-      <Routes>
+      <Suspense
+        fallback={
+          <main className="grid min-h-[50vh] place-items-center bg-slate-50 px-4 text-slate-600">
+            <p className="text-sm font-medium">Loading ReduxShop…</p>
+          </main>
+        }
+      >
+        <Routes>
 
         {/* ================= CUSTOMER ROUTES ================= */}
        
@@ -398,7 +404,8 @@ function App() {
 
 </Route>
 
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

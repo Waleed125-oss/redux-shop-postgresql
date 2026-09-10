@@ -190,6 +190,7 @@ function Navbar() {
               to="/"
               onClick={closeMobileMenu}
               className="
+                legacy-brand
                 text-2xl
                 sm:text-3xl
                 font-bold

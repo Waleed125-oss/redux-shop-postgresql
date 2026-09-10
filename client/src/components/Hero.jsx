@@ -12,7 +12,7 @@ function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-800 text-white">
+    <section className="legacy-hero relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-800 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(96,165,250,0.35),_transparent_38%)]" />
       <div
         className="
