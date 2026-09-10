@@ -79,24 +79,24 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="relative w-64 bg-slate-900 text-white min-h-screen overflow-hidden">
+    <aside className="relative w-full min-h-0 overflow-hidden bg-slate-900 text-white lg:w-64 lg:min-h-screen">
 
       {/* ================================================= */}
       {/* MAIN SIDEBAR */}
       {/* ================================================= */}
 
       <div
-        className={`w-64 min-h-screen transition-transform duration-300 ease-in-out ${
+        className={`w-full min-h-0 transition-transform duration-300 ease-in-out lg:w-64 lg:min-h-screen ${
           sellerOpen ? "-translate-x-full" : "translate-x-0"
         }`}
       >
         {/* Logo */}
-        <div className="text-3xl font-bold text-center py-8 border-b border-slate-700">
+        <div className="hidden border-b border-slate-700 py-8 text-center text-3xl font-bold lg:block">
           ReduxShop
         </div>
 
         {/* Main Navigation */}
-        <nav className="mt-8">
+        <nav className="flex overflow-x-auto py-2 lg:mt-8 lg:block lg:overflow-visible lg:py-0">
           {menu.map((item) => {
             // Sellers button
             if (item.name === "Sellers") {
@@ -104,7 +104,7 @@ function Sidebar() {
                 <button
                   key={item.name}
                   onClick={() => setSellerOpen(true)}
-                  className="w-full flex items-center gap-4 px-8 py-4 transition hover:bg-slate-800"
+                  className="flex shrink-0 items-center gap-3 px-4 py-3 transition hover:bg-slate-800 lg:w-full lg:gap-4 lg:px-8 lg:py-4"
                 >
                   {item.icon}
                   <span>{item.name}</span>
@@ -119,7 +119,7 @@ function Sidebar() {
                 to={item.path}
                 end={item.path === "/admin"}
                 className={({ isActive }) =>
-                  `flex items-center gap-4 px-8 py-4 transition ${
+                  `flex shrink-0 items-center gap-3 px-4 py-3 transition lg:w-full lg:gap-4 lg:px-8 lg:py-4 ${
                     isActive
                       ? "bg-blue-600"
                       : "hover:bg-slate-800"
@@ -139,14 +139,14 @@ function Sidebar() {
       {/* ================================================= */}
 
       <div
-        className={`absolute top-0 left-0 w-64 min-h-screen bg-slate-900 transition-transform duration-300 ease-in-out ${
+        className={`absolute top-0 left-0 w-full min-h-0 bg-slate-900 transition-transform duration-300 ease-in-out lg:w-64 lg:min-h-screen ${
           sellerOpen
             ? "translate-x-0"
             : "translate-x-full"
         }`}
       >
         {/* Seller Header */}
-        <div className="flex items-center gap-4 px-6 py-8 border-b border-slate-700">
+        <div className="flex items-center gap-3 border-b border-slate-700 px-4 py-3 lg:gap-4 lg:px-6 lg:py-8">
 
           <button
             onClick={() => setSellerOpen(false)}
@@ -155,20 +155,20 @@ function Sidebar() {
             <FaArrowLeft />
           </button>
 
-          <div className="text-2xl font-bold">
+          <div className="text-xl font-bold lg:text-2xl">
             Sellers
           </div>
         </div>
 
         {/* Seller Navigation */}
-        <nav className="mt-8">
+        <nav className="flex overflow-x-auto py-2 lg:mt-8 lg:block lg:overflow-visible lg:py-0">
 
           {sellerMenu.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-4 px-8 py-4 transition ${
+                `flex shrink-0 items-center gap-3 px-4 py-3 transition lg:w-full lg:gap-4 lg:px-8 lg:py-4 ${
                   isActive
                     ? "bg-blue-600"
                     : "hover:bg-slate-800"

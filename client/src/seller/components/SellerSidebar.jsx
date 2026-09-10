@@ -180,11 +180,11 @@ function SellerSidebar() {
   ];
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-0 text-white lg:min-h-screen">
 
       {/* ================= LOGO ================= */}
 
-      <div className="px-6 py-7 border-b border-slate-700">
+      <div className="hidden border-b border-slate-700 px-6 py-7 lg:block">
 
         <h1 className="text-2xl font-bold">
           ReduxShop
@@ -198,7 +198,7 @@ function SellerSidebar() {
 
       {/* ================= NAVIGATION ================= */}
 
-      <nav className="mt-6">
+      <nav className="flex overflow-x-auto py-2 lg:mt-6 lg:block lg:overflow-visible lg:py-0">
 
         {links.map((link) => (
 
@@ -209,11 +209,16 @@ function SellerSidebar() {
             className={({ isActive }) =>
               `
                 flex
+                shrink-0
                 items-center
-                gap-4
-                px-6
-                py-4
+                gap-3
+                px-4
+                py-3
                 transition
+                lg:w-full
+                lg:gap-4
+                lg:px-6
+                lg:py-4
                 ${
                   isActive
                     ? "bg-blue-600 text-white"
