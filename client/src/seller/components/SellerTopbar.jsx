@@ -186,17 +186,26 @@ function SellerTopbar() {
         {profileOpen && (
           <div
             className="
-              absolute
-              right-0
-              top-[calc(100%+10px)]
-              w-60
+              fixed
+              left-4
+              right-4
+              top-[4.5rem]
+              w-auto
+              max-h-[calc(100vh-5.5rem)]
+              overflow-y-auto
+              sm:absolute
+              sm:left-auto
+              sm:right-0
+              sm:top-[calc(100%+10px)]
+              sm:w-60
+              sm:max-h-none
               bg-white
               border
               border-gray-100
               rounded-2xl
               shadow-2xl
               shadow-slate-900/10
-              z-50
+              z-[100]
               overflow-hidden
               animate-in
               fade-in

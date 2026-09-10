@@ -237,10 +237,19 @@ function Topbar() {
 
             <div
               className="
-                absolute
-                right-0
-                mt-3
-                w-60
+                fixed
+                left-4
+                right-4
+                top-[4.5rem]
+                w-auto
+                max-h-[calc(100vh-5.5rem)]
+                overflow-y-auto
+                sm:absolute
+                sm:left-auto
+                sm:right-0
+                sm:top-[calc(100%+12px)]
+                sm:w-60
+                sm:max-h-none
                 bg-white
                 rounded-2xl
                 shadow-2xl
@@ -248,7 +257,7 @@ function Topbar() {
                 border
                 border-gray-100
                 overflow-hidden
-                z-50
+                z-[100]
                 animate-in
                 fade-in
                 slide-in-from-top-2

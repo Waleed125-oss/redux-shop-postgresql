@@ -102,16 +102,16 @@ function CategoryItem({
   // ===================================================
 
   const handleClick = () => {
-    navigate(`/inventory?category=${category.id}`);
-
     if (hasChildren) {
       setOpenPath([
         ...openPath.slice(0, level),
         category.id,
       ]);
-    } else {
-      setOpenPath([]);
+      return;
     }
+
+    navigate(`/inventory?category=${category.id}`);
+    setOpenPath([]);
   };
 
   return (
