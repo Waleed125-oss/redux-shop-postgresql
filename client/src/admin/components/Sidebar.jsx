@@ -15,7 +15,7 @@ import {
 
 import { NavLink } from "react-router-dom";
 
-function Sidebar() {
+function Sidebar({ onNavigate }) {
   const [sellerOpen, setSellerOpen] = useState(false);
 
   const menu = [
@@ -79,24 +79,24 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="relative w-full min-h-0 overflow-hidden bg-slate-900 text-white lg:w-64 lg:min-h-screen">
+    <aside className="relative w-64 bg-slate-900 text-white min-h-screen overflow-hidden">
 
       {/* ================================================= */}
       {/* MAIN SIDEBAR */}
       {/* ================================================= */}
 
       <div
-        className={`w-full min-h-0 transition-transform duration-300 ease-in-out lg:w-64 lg:min-h-screen ${
+        className={`w-64 min-h-screen transition-transform duration-300 ease-in-out ${
           sellerOpen ? "-translate-x-full" : "translate-x-0"
         }`}
       >
         {/* Logo */}
-        <div className="hidden border-b border-slate-700 py-8 text-center text-3xl font-bold lg:block">
+        <div className="text-3xl font-bold text-center py-8 border-b border-slate-700">
           ReduxShop
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex overflow-x-auto py-2 lg:mt-8 lg:block lg:overflow-visible lg:py-0">
+        <nav className="mt-8">
           {menu.map((item) => {
             // Sellers button
             if (item.name === "Sellers") {
@@ -104,7 +104,7 @@ function Sidebar() {
                 <button
                   key={item.name}
                   onClick={() => setSellerOpen(true)}
-                  className="flex shrink-0 items-center gap-3 px-4 py-3 transition hover:bg-slate-800 lg:w-full lg:gap-4 lg:px-8 lg:py-4"
+                  className="w-full flex items-center gap-4 px-8 py-4 transition hover:bg-slate-800"
                 >
                   {item.icon}
                   <span>{item.name}</span>
@@ -118,8 +118,9 @@ function Sidebar() {
                 key={item.name}
                 to={item.path}
                 end={item.path === "/admin"}
+                onClick={onNavigate}
                 className={({ isActive }) =>
-                  `flex shrink-0 items-center gap-3 px-4 py-3 transition lg:w-full lg:gap-4 lg:px-8 lg:py-4 ${
+                  `flex items-center gap-4 px-8 py-4 transition ${
                     isActive
                       ? "bg-blue-600"
                       : "hover:bg-slate-800"
@@ -139,14 +140,14 @@ function Sidebar() {
       {/* ================================================= */}
 
       <div
-        className={`absolute top-0 left-0 w-full min-h-0 bg-slate-900 transition-transform duration-300 ease-in-out lg:w-64 lg:min-h-screen ${
+        className={`absolute top-0 left-0 w-64 min-h-screen bg-slate-900 transition-transform duration-300 ease-in-out ${
           sellerOpen
             ? "translate-x-0"
             : "translate-x-full"
         }`}
       >
         {/* Seller Header */}
-        <div className="flex items-center gap-3 border-b border-slate-700 px-4 py-3 lg:gap-4 lg:px-6 lg:py-8">
+        <div className="flex items-center gap-4 px-6 py-8 border-b border-slate-700">
 
           <button
             onClick={() => setSellerOpen(false)}
@@ -155,20 +156,21 @@ function Sidebar() {
             <FaArrowLeft />
           </button>
 
-          <div className="text-xl font-bold lg:text-2xl">
+          <div className="text-2xl font-bold">
             Sellers
           </div>
         </div>
 
         {/* Seller Navigation */}
-        <nav className="flex overflow-x-auto py-2 lg:mt-8 lg:block lg:overflow-visible lg:py-0">
+        <nav className="mt-8">
 
           {sellerMenu.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
+              onClick={onNavigate}
               className={({ isActive }) =>
-                `flex shrink-0 items-center gap-3 px-4 py-3 transition lg:w-full lg:gap-4 lg:px-8 lg:py-4 ${
+                `flex items-center gap-4 px-8 py-4 transition ${
                   isActive
                     ? "bg-blue-600"
                     : "hover:bg-slate-800"

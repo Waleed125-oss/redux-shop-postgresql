@@ -145,7 +145,7 @@ import {
   FaFileInvoiceDollar,
 } from "react-icons/fa";
 
-function SellerSidebar() {
+function SellerSidebar({ onNavigate }) {
   const links = [
     {
       name: "Dashboard",
@@ -180,11 +180,11 @@ function SellerSidebar() {
   ];
 
   return (
-    <div className="min-h-0 text-white lg:min-h-screen">
+    <div className="min-h-screen text-white">
 
       {/* ================= LOGO ================= */}
 
-      <div className="hidden border-b border-slate-700 px-6 py-7 lg:block">
+      <div className="px-6 py-7 border-b border-slate-700">
 
         <h1 className="text-2xl font-bold">
           ReduxShop
@@ -198,7 +198,7 @@ function SellerSidebar() {
 
       {/* ================= NAVIGATION ================= */}
 
-      <nav className="flex overflow-x-auto py-2 lg:mt-6 lg:block lg:overflow-visible lg:py-0">
+      <nav className="mt-6">
 
         {links.map((link) => (
 
@@ -206,19 +206,15 @@ function SellerSidebar() {
             key={link.path}
             to={link.path}
             end={link.path === "/seller"}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `
                 flex
-                shrink-0
                 items-center
-                gap-3
-                px-4
-                py-3
+                gap-4
+                px-6
+                py-4
                 transition
-                lg:w-full
-                lg:gap-4
-                lg:px-6
-                lg:py-4
                 ${
                   isActive
                     ? "bg-blue-600 text-white"
